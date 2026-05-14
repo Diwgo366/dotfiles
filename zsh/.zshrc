@@ -36,8 +36,7 @@ if [[ $- == *i* ]]; then
         local chars=$#text wide=0 i char
         for ((i=1; i<=chars; i++)); do
             char=$text[i]
-            # Solo cuento como ancho si es UTF-8 de 4+ bytes (emoji real, U+10000+)
-            [[ $(echo -n "$char" | wc -c) -gt 3 ]] && wide=$(( wide + 1 ))
+            (( $(( #char )) > 0xFFFF )) && wide=$(( wide + 1 ))
         done
         local visual=$(( chars + wide ))
         local left=$(( (WIDTH - visual) / 2 ))
