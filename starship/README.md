@@ -1,18 +1,19 @@
 # ⭐ Configuración de Starship
 
 ## Descripción
-Prompt personalizado con Starship optimizado para desarrollo, usando caracteres de CaskayDiamono Nerd Font con separadores claros y símbolos Git intuitivos.
+Prompt personalizado con Starship optimizado para desarrollo, usando caracteres elegantes de CaskayDiamono Nerd Font con hora al inicio y símbolos intuitivos de Git.
 
 ## Características
 
 ### Layout (2 líneas)
-**Línea 1:** Usuario → Hostname → Directorio ║ Rama Git (+ estado) ║ Hora  
+**Línea 1:** Hora (HH:MM) → Usuario → Hostname → Directorio ◈ Rama Git (+ estado)  
 **Línea 2:** Flecha moderna (➜) como carácter de entrada
 
 ### Módulos Activos
 
 | Módulo | Descripción | Símbolo |
 |--------|-------------|---------|
+| time | Hora actual (HH:MM) | — |
 | username | Usuario actual (siempre visible) | — |
 | hostname | Nombre del servidor | — |
 | directory | Ruta del directorio (sin truncación) | — |
@@ -24,9 +25,8 @@ Prompt personalizado con Starship optimizado para desarrollo, usando caracteres 
 | python | Versión de Python |  |
 | rust | Versión de Rust |  |
 | golang | Versión de Go |  |
-| time | Hora actual (HH:MM) | — |
 | cmd_duration | Duración del comando (> 500ms) | — |
-| status | Estado del comando | ✖ (error) |
+| status | Estado del comando | ✕ (error) |
 
 ### Colores
 - **Tema:** Dracula
@@ -34,108 +34,137 @@ Prompt personalizado con Starship optimizado para desarrollo, usando caracteres 
 
 ## Separadores
 
-Los separadores `║` dividen claramente las secciones principales:
+El símbolo `◈` divide claramente las secciones principales:
 
 ```
-diego on diego-server in ~/ruta ║  main ●+? 14:32
-                                ║
-                    Separador entre contexto y rama Git
+00:11 diego on diego-server in ~/ruta ◈  main ◉◆?⇧2
+                                      ◈
+                                  Separador
 ```
 
 ## Símbolos Git Status - Explicados Claramente
 
-Cuando estés en un repositorio Git, verás símbolos que indican el estado de tus cambios:
+Cuando estés en un repositorio Git, verás símbolos que indican el estado exacto de tus cambios:
 
 ### Estados de Archivos
 
-| Símbolo | Significado | Ejemplo |
-|---------|-------------|---------|
-| `●` | **Modificado**: Archivos con cambios no guardados | Editaste un archivo |
-| `+` | **Staged**: Cambios preparados para commit | Ya hiciste `git add` |
-| `✖` | **Deletado**: Archivos eliminados | Borraste un archivo |
-| `»` | **Renombrado**: Archivo cambió de nombre | Renombraste algo |
-| `?` | **Sin seguimiento**: Archivos nuevos | Archivo nuevo no rastreado |
-| `*` | **Stashed**: Cambios guardados en stash | Guardaste cambios temporales |
-| `⚔` | **Conflicto**: Conflicto de merge | Hay conflictos sin resolver |
+| Símbolo | Significado | Acción Necesaria |
+|---------|-------------|-----------------|
+| `◉` | **Modificado** | Archivos editados sin guardar | `git add` o `git commit` |
+| `◆` | **Staged** | Cambios preparados para commit | `git commit` |
+| `⊙` | **Deletado** | Archivos eliminados | `git add` o revisar cambios |
+| `⟳` | **Renombrado** | Archivo cambió de nombre | `git add` o revisar cambios |
+| `◇` | **Sin seguimiento** | Archivos nuevos | `git add` para incluir |
+| `◎` | **Stashed** | Cambios guardados temporalmente | `git stash pop` para recuperar |
+| `✕` | **Conflicto** | Conflicto de merge | Resolver conflictos manualmente |
 
 ### Estados de Sincronización con Remoto
 
-| Símbolo | Significado | Ejemplo |
-|---------|-------------|---------|
-| `↑1` | **Commits adelante**: Tu rama va 1 commit adelante | Hiciste commits sin push |
-| `↓2` | **Commits atrás**: Tu rama va 2 commits atrás | Hay cambios en remoto |
-| `↕ ↑1 ↓1` | **Diverged**: Ambas ramas tienen cambios | Necesitas sincronizar |
+| Símbolo | Significado | Acción Necesaria |
+|---------|-------------|-----------------|
+| `⇧2` | **2 commits adelante** | Tu rama va adelante del remoto | `git push` para subir |
+| `⇩1` | **1 commit atrás** | Tu rama va atrás del remoto | `git pull` para descargar |
+| `⇳ ⇧1 ⇩1` | **Diverged** | Ambas ramas tienen cambios | Sincronizar (merge o rebase) |
 
-## Ejemplos Visuales
+## Ejemplos Visuales del Prompt
 
 ### Repositorio Limpio (sin cambios)
 ```
-diego on diego-server in ~/proyecto ║  main 14:32
+00:11 diego on diego-server in ~/proyecto ◈  main
 ➜ 
 ```
 
 ### Con Cambios Modificados
 ```
-diego on diego-server in ~/proyecto ║  main ● 14:32
+00:11 diego on diego-server in ~/proyecto ◈  main ◉
 ➜ 
 ```
-(● significa hay archivos modificados)
+(◉ = hay archivos modificados, necesitas `git add`)
 
 ### Con Cambios Staged y Modificados
 ```
-diego on diego-server in ~/proyecto ║  main ●+ 14:32
+00:11 diego on diego-server in ~/proyecto ◈  main ◉◆
 ➜ 
 ```
-(● = modificados, + = staged)
+(◉ = modificados, ◆ = preparados para commit)
 
-### Con Commits Pendientes
+### Con Archivos sin Seguimiento
 ```
-diego on diego-server in ~/proyecto ║  main ↑2 14:32
+00:11 diego on diego-server in ~/proyecto ◈  main ◇
 ➜ 
 ```
-(↑2 significa 2 commits adelante del remoto)
+(◇ = archivos nuevos sin rastrear, usa `git add`)
+
+### Con Commits sin Push
+```
+00:11 diego on diego-server in ~/proyecto ◈  main ⇧2
+➜ 
+```
+(⇧2 = 2 commits adelante, necesitas `git push`)
+
+### Con Cambios en Remoto
+```
+00:11 diego on diego-server in ~/proyecto ◈  main ⇩1
+➜ 
+```
+(⇩1 = 1 commit atrás, necesitas `git pull`)
+
+## Configuración de Colores para `ls`
+
+Se incluye configuración de colores automática para `ls` usando la paleta Dracula:
+
+- **Directorios:** Azul (34)
+- **Archivos normales:** Blanco (37)
+- **Enlaces simbólicos:** Cyan (36)
+- **Ejecutables:** Verde (32)
+- **Archivos JSON/YAML:** Amarillo (33)
+- **Archivos con errores:** Rojo (31)
+
+### Alias Disponibles
+```bash
+ls       # Lista con colores
+la       # Lista todos los archivos (incluyendo ocultos)
+ll       # Lista larga con tamaños legibles
+ld       # Lista solo directorios
+```
 
 ## Personalización
-
-### Cambiar la duración mínima de comandos
-En `[cmd_duration]`, modificar:
-```toml
-min_time = 500  # En milisegundos
-```
 
 ### Cambiar formato de hora
 En `[time]`, modificar:
 ```toml
 time_format = "%H:%M"     # Solo hora (actual)
 time_format = "%H:%M:%S"  # Con segundos
-time_format = "%d/%m"     # Solo fecha
+time_format = "%d/%m %H:%M"  # Con fecha
 ```
 
 ### Cambiar símbolos de Git
 En `[git_status]`, puedes personalizar:
 ```toml
-modified = "●"      # Cambiar ● por otro símbolo
-staged = "+"        # Cambiar + por otro símbolo
-deleted = "✖"       # Cambiar ✖ por otro símbolo
-# ... etc
+modified = "◉"      # Cambiar ◉ por otro símbolo
+staged = "◆"        # Cambiar ◆ por otro símbolo
+deleted = "⊙"       # Cambiar ⊙ por otro símbolo
 ```
 
 ### Cambiar separadores
-En cada módulo puedes cambiar `║` por otro símbolo:
+En cada módulo `format` puedes cambiar `◈` por otro símbolo:
 ```toml
 [git_branch]
-format = " ▸ [$symbol$branch]($style)"  # Usa ▸ en lugar de ║
+format = " ▸ [$symbol$branch]($style)"  # Usa ▸ en lugar de ◈
 ```
 
-### Cambiar colores
-Modifica la paleta `[palettes.dracula]` con valores hex
+### Cambiar colores de ls
+Editar `LS_COLORS` en `/home/diego/dotfiles/zsh/.zsh.d/30-zsh-config.zsh`
+
+### Cambiar colores del prompt
+Modifica la paleta `[palettes.dracula]` en `starship.toml` con valores hex
 
 ### Deshabilitar un módulo
 Usa `disabled = true` en la sección del módulo
 
-## Archivo de Configuración
-- **Ubicación:** `~/.config/starship.toml`
-- **Enlace del proyecto:** `/home/diego/dotfiles/starship/.config/starship.toml`
+## Archivos de Configuración
+- **Prompt:** `/home/diego/dotfiles/starship/.config/starship.toml`
+- **Colores ls:** `/home/diego/dotfiles/zsh/.zsh.d/30-zsh-config.zsh`
 
 ## Inicialización
 Ya configurado automáticamente en `~/.zshrc`:
@@ -146,7 +175,7 @@ eval "$(~/.local/bin/starship init zsh)"
 ## Requisitos
 - **Starship:** v1.25.1+
 - **Fuente:** CaskayDiamono Nerd Font
-- **Shell:** Zsh (o bash con ajustes)
+- **Shell:** Zsh
 
 ## Referencias
 - [Documentación de Starship](https://starship.rs/)

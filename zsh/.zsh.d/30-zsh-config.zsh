@@ -30,3 +30,28 @@ setopt ALWAYS_TO_END            # Move to end of line after completion
 # === Corrección ===
 setopt CORRECT                  # Spell correction for commands
 # setopt CORRECT_ALL            # Spell correction for all arguments (descomenta si lo necesitas)
+
+# ==============================================================
+# COLORES PARA LS (Dracula Theme)
+# ==============================================================
+# Habilitar colores en ls
+export CLICOLOR=1
+export CLICOLOR_FORCE=1
+
+# Configuración de colores para ls (LS_COLORS)
+# Formato: type=color
+# Colores: 30=black, 31=red, 32=green, 33=yellow, 34=blue, 35=magenta, 36=cyan, 37=white
+# Estilos: bold=1, dim=2, normal=0
+export LS_COLORS='di=34:fi=37:ln=36:or=31:ex=32:*.txt=37:*.md=37:*.json=33:*.yml=33:*.yaml=33'
+
+# Alias mejorado para ls con colores
+alias ls='ls -G'                # macOS/BSD
+alias la='ls -lAG'              # All files with long format
+alias ll='ls -lhG'              # Long format with human readable sizes
+alias ld='ls -ldG */'           # Only directories
+
+# Si estás en Linux, usa estos alias en su lugar:
+# alias ls='ls --color=auto'
+# alias la='ls -lA --color=auto'
+# alias ll='ls -lh --color=auto'
+# alias lld='ls -ld --color=auto' */'
