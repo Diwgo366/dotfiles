@@ -44,14 +44,8 @@ export CLICOLOR_FORCE=1
 # Estilos: bold=1, dim=2, normal=0
 export LS_COLORS='di=34:fi=37:ln=36:or=31:ex=32:*.txt=37:*.md=37:*.json=33:*.yml=33:*.yaml=33'
 
-# Alias mejorado para ls con colores
-alias ls='ls -G'                # macOS/BSD
-alias la='ls -lAG'              # All files with long format
-alias ll='ls -lhG'              # Long format with human readable sizes
-alias ld='ls -ldG */'           # Only directories
-
-# Si estás en Linux, usa estos alias en su lugar:
-# alias ls='ls --color=auto'
-# alias la='ls -lA --color=auto'
-# alias ll='ls -lh --color=auto'
-# alias lld='ls -ld --color=auto' */'
+# Alias mejorado para ls con colores (Linux)
+alias ls='ls --color=auto'                # Enable colors
+alias la='ls -lA --color=auto'            # All files with long format
+alias ll='ls -lh --color=auto'            # Long format with human readable sizes
+alias ld='ls -ld --color=auto */'         # Only directories
