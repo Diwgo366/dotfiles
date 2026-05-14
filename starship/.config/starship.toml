@@ -1,0 +1,156 @@
+# ====================================================================
+# CONFIGURACIÓN DE STARSHIP - Terminal prompt
+# ====================================================================
+# Tema: Dracula con CaskayDiamono Nerd Font
+# Layout: 2 líneas (Información + Comandos)
+# ====================================================================
+
+palette = "dracula"
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$docker_context\
+$conda\
+$nodejs\
+$python\
+$rust\
+$golang\
+$time\
+$line_break\
+$cmd_duration\
+$status\
+$character"""
+
+# ====================================================================
+# CARÁCTER DE ENTRADA (Flechas modernas)
+# ====================================================================
+[character]
+error_symbol = "[➜](bold red)"
+success_symbol = "[➜](bold green)"
+
+# ====================================================================
+# LÍNEA 1: INFORMACIÓN DEL CONTEXTO
+# ====================================================================
+
+[username]
+show_always = true
+format = "[$user]($style)"
+style_user = "bold cyan"
+style_root = "bold red"
+
+[hostname]
+ssh_only = false
+ssh_symbol = " "
+format = " on [$hostname]($style)"
+style = "bold purple"
+
+[directory]
+truncation_length = 0
+truncate_to_repo = false
+format = " in [$path]($style)[$read_only]($read_only_style)"
+style = "bold green"
+read_only = " "
+read_only_style = "bold red"
+home_symbol = "~"
+
+[directory.substitutions]
+"Documents" = " "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[git_branch]
+style = "bold pink"
+format = " │ [$symbol$branch]($style)"
+symbol = " "
+
+[git_status]
+style = "bold red"
+format = " [$all_status$ahead_behind]($style)"
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?"
+stashed = "*"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+[docker_context]
+style = "bold blue"
+format = " │ [$symbol$context]($style)"
+symbol = " "
+only_with_files = true
+detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+
+[conda]
+style = "bold green"
+format = " │ [$symbol$environment]($style)"
+symbol = " "
+
+[nodejs]
+style = "bold green"
+format = " │ [$symbol$version]($style)"
+symbol = " "
+
+[python]
+style = "bold blue"
+format = " │ [$symbol$version]($style)"
+symbol = " "
+
+[rust]
+style = "bold orange"
+format = " │ [$symbol$version]($style)"
+symbol = " "
+
+[golang]
+style = "bold cyan"
+format = " │ [$symbol$version]($style)"
+symbol = " "
+
+# ====================================================================
+# LÍNEA 2: INFORMACIÓN DEL COMANDO
+# ====================================================================
+
+[time]
+disabled = false
+style = "bold white"
+format = "[$time]($style)"
+time_format = "%H:%M:%S"
+
+[cmd_duration]
+min_time = 500
+style = "bold yellow"
+format = " │ [$duration]($style)"
+
+[status]
+style = "bold red"
+symbol = "✘"
+success_symbol = ""
+format = " [$symbol]($style)"
+map_symbol = true
+disabled = false
+pipestatus = true
+
+# ====================================================================
+# PALETA DE COLORES - DRACULA
+# ====================================================================
+[palettes.dracula]
+background = "#282a36"
+current_line = "#44475a"
+foreground = "#f8f8f2"
+comment = "#6272a4"
+cyan = "#8be9fd"
+green = "#50fa7b"
+orange = "#ffb86c"
+pink = "#ff79c6"
+purple = "#bd93f9"
+red = "#ff5555"
+yellow = "#f1fa8c"
+white = "#f8f8f2"
+blue = "#8be9fd"

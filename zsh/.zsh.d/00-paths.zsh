@@ -16,6 +16,11 @@
 # Spicetify (CLI de Spotify)
 [[ -d "$HOME/.spicetify" ]]   && path=("$HOME/.spicetify" $path)
 
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
 # SAC (Código de Análisis Sísmico)
 if [[ -d "$HOME/sismica/sac/bin" ]]; then
     path=("$HOME/sismica/sac/bin" $path)
