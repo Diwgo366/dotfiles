@@ -14,8 +14,10 @@ $directory\
 $git_branch\
 $git_status\
 $docker_context\
-$conda\
 $python\
+$jupyter\
+$lua\
+$bash\
 $line_break\
 $cmd_duration\
 $status\
@@ -35,25 +37,25 @@ success_symbol = "[▸](bold green)"
 [time]
 disabled = false
 style = "bold green"
-format = "[$time]($style) "
+format = "[$time]($style)"
 time_format = "%H:%M"
 
 [username]
 show_always = true
-format = "[$user]($style)"
+format = " ║ [$user]($style)"
 style_user = "bold cyan"
 style_root = "bold red"
 
 [hostname]
-ssh_only = false
+ssh_only = true
 ssh_symbol = " "
-format = " - [$hostname]($style)"
+format = " ◈ [$hostname]($style)"
 style = "bold pink"
 
 [directory]
 truncation_length = 0
 truncate_to_repo = false
-format = " || [$path]($style)[$read_only]($read_only_style)"
+format = " ║ [$path]($style)[$read_only]($read_only_style)"
 style = "bold purple"
 read_only = " "
 read_only_style = "bold red"
@@ -66,14 +68,13 @@ home_symbol = "~"
 "Pictures" = " "
 
 [git_branch]
-style = "bold pink"
+style = "bold orange"
 format = " ║ [$symbol$branch]($style)"
 symbol = " "
 
 [git_status]
-style = "bold red"
 format = " [$all_status$ahead_behind]($style)"
-# Estados de Git con símbolos elegantes (con espacios entre ellos):
+# Estados de Git con símbolos elegantes y colores individuales:
 # ●  = Modificado (archivo editado, no guardado)
 # ⊕  = Staged (cambios preparados para commit)
 # ⊖  = Deletado (archivo eliminado)
@@ -81,48 +82,42 @@ format = " [$all_status$ahead_behind]($style)"
 # ◯  = Sin seguimiento (archivo nuevo no rastreado)
 # ◎  = Stashed (cambios guardados temporalmente)
 # ✕  = Conflicto (conflicto de merge sin resolver)
-conflicted = "✕ "
-ahead = " ⇧${count}"
-behind = " ⇩${count}"
-diverged = " ⇳ ⇧${ahead_count} ⇩${behind_count}"
-untracked = " ◯"
-stashed = " ◎"
-modified = " ●"
-staged = " ⊕"
-renamed = " ⟳"
-deleted = " ⊖"
+conflicted = "[✕ ](bold red)"
+ahead = "[⇧ ${count}](bold green)"
+behind = "[⇩ ${count}](bold cyan)"
+diverged = "[⇳ ⇧ ${ahead_count} ⇩ ${behind_count}](bold yellow)"
+untracked = "[◯](bold magenta)"
+stashed = "[◎](bold blue)"
+modified = "[●](bold yellow)"
+staged = "[⊕](bold green)"
+renamed = "[⟳](bold cyan)"
+deleted = "[⊖](bold red)"
 
 [docker_context]
 style = "bold blue"
-format = " ║ [$symbol$context]($style)"
-symbol = " "
+format = " ║ [🐳 $context]($style)"
 only_with_files = true
 detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
 
-[conda]
-style = "bold green"
-format = " ║ [$symbol$environment]($style)"
-symbol = " "
-
-[nodejs]
-style = "bold green"
-format = " ║ [$symbol$version]($style)"
-symbol = " "
-
 [python]
 style = "bold blue"
-format = " ║ [$symbol$version]($style)"
-symbol = " "
+format = " ║ [🐍 $version]($style)"
+symbol = ""
 
-[rust]
+[jupyter]
 style = "bold orange"
-format = " ║ [$symbol$version]($style)"
-symbol = " "
+format = " ║ [📓 $version]($style)"
+symbol = ""
 
-[golang]
+[lua]
 style = "bold cyan"
-format = " ║ [$symbol$version]($style)"
-symbol = " "
+format = " ║ [🌙 $version]($style)"
+symbol = ""
+
+[bash]
+style = "bold green"
+format = " ║ [🔨 $version]($style)"
+symbol = ""
 
 # ====================================================================
 # LÍNEA 2: INFORMACIÓN DEL COMANDO
