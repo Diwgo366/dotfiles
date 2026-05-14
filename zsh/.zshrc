@@ -61,7 +61,7 @@ if [[ $- == *i* ]]; then
         echo "$border"
         echo "║$(_center "$icon $greeting, $(whoami)")║"
         echo "║$(_center "Sistema: $(uname -s) ║ Terminal: zsh")║"
-        echo "╚${border:1:WIDTH}╝"
+        echo "╚${border:1:$WIDTH}╝"
     }
 
     _show_welcome
