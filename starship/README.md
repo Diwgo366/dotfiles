@@ -1,12 +1,12 @@
 # ⭐ Configuración de Starship
 
 ## Descripción
-Prompt personalizado con Starship optimizado para desarrollo, usando caracteres elegantes de CaskayDiamono Nerd Font con hora al inicio, taza de café en horarios nocturnos, y símbolos intuitivos de Git.
+Prompt personalizado con Starship optimizado para desarrollo, usando caracteres elegantes de CaskayDiamono Nerd Font con hora al inicio y símbolos intuitivos de Git.
 
 ## Características
 
 ### Layout (2 líneas)
-**Línea 1:** Hora (HH:MM) ☕ → Usuario → Hostname → Directorio ║ Rama Git (+ estado)  
+**Línea 1:** Hora (HH:MM) → Usuario → Hostname → Directorio ║ Rama Git (+ estado)  
 **Línea 2:** Triángulo (▸) como carácter de entrada
 
 ### Módulos Activos
@@ -37,7 +37,7 @@ Prompt personalizado con Starship optimizado para desarrollo, usando caracteres 
 El símbolo `║` divide claramente las secciones principales:
 
 ```
-00:11☕ diego - diego-server in ~/ruta ║  main ●⊕⊖◯ 
+00:11 diego - diego-server in ~/ruta ║  main ● ⊕ ⊖ ◯
                                        ║
                                    Separador
 ```
@@ -83,7 +83,7 @@ Cuando estés en un repositorio Git, verás símbolos que indican el estado exac
 
 ### Con Cambios Staged y Modificados
 ```
-00:11 diego - diego-server in ~/proyecto ║  main ●⊕
+00:11 diego - diego-server in ~/proyecto ║  main ● ⊕
 ▸ 
 ```
 (● = modificados, ⊕ = preparados para commit)
@@ -108,13 +108,6 @@ Cuando estés en un repositorio Git, verás símbolos que indican el estado exac
 ▸ 
 ```
 (⇩1 = 1 commit atrás, necesitas `git pull`)
-
-### En Horario Nocturno (20:00-06:00)
-```
-00:47☕ diego - diego-server in ~/proyecto ║  main ●
-▸ 
-```
-(☕ = hora nocturna, automáticamente agregado)
 
 ## Configuración de Colores para `ls`
 
@@ -159,12 +152,6 @@ En cada módulo `format` puedes cambiar `║` por otro símbolo:
 ```toml
 [git_branch]
 format = " ▸ [$symbol$branch]($style)"  # Usa ▸ en lugar de ║
-```
-
-### Desactivar café en horario nocturno
-En `zsh/.zsh.d/20-functions.zsh`, comentar la línea:
-```bash
-# coffee=" ☕"  # Comentar esta línea
 ```
 
 ### Cambiar colores de ls
