@@ -1,12 +1,12 @@
 # ⭐ Configuración de Starship
 
 ## Descripción
-Prompt personalizado con Starship optimizado para desarrollo, usando caracteres de CaskayDiamono Nerd Font con separadores elegantes entre bloques.
+Prompt personalizado con Starship optimizado para desarrollo, usando caracteres de CaskayDiamono Nerd Font con separadores claros y símbolos Git intuitivos.
 
 ## Características
 
 ### Layout (2 líneas)
-**Línea 1:** Contexto - usuario, hostname, directorio, rama git, estado y timestamp  
+**Línea 1:** Usuario → Hostname → Directorio ║ Rama Git (+ estado) ║ Hora  
 **Línea 2:** Flecha moderna (➜) como carácter de entrada
 
 ### Módulos Activos
@@ -17,73 +17,83 @@ Prompt personalizado con Starship optimizado para desarrollo, usando caracteres 
 | hostname | Nombre del servidor | — |
 | directory | Ruta del directorio (sin truncación) | — |
 | git_branch | Rama actual |  |
-| git_status | Estado de cambios (modificado, staged, etc.) | — |
+| git_status | Estado de cambios | (ver abajo) |
 | docker_context | Contexto de Docker (auto-detecta) |  |
 | conda | Entorno Conda |  |
 | nodejs | Versión de Node.js |  |
 | python | Versión de Python |  |
 | rust | Versión de Rust |  |
 | golang | Versión de Go |  |
-| time | Hora actual (HH:MM:SS) | — |
+| time | Hora actual (HH:MM) | — |
 | cmd_duration | Duración del comando (> 500ms) | — |
-| status | Estado del comando | ✘ (error) |
+| status | Estado del comando | ✖ (error) |
 
 ### Colores
 - **Tema:** Dracula
 - **Fuente:** CaskayDiamono Nerd Font
 
-## Características Principales
+## Separadores
 
-### Git Avanzado ✅
-- Rama actual con ícono Nerd Font
-- Estado detallado: modificado (!), staged (+), deleted (✘), etc.
-- Indicadores: ahead (⇡), behind (⇣), diverged (⇕)
-- Conflictos (=) y stash (*)
-- Sin seguimiento (?)
+Los separadores `║` dividen claramente las secciones principales:
 
-### Contexto del Sistema ✅
-- **Usuario:** Siempre visible, rojo si root, cyan si usuario normal
-- **Hostname:** Mostrado en cada prompt
-- **Directorio:** Sin truncación, simplificado con ~ desde home
-- **Ícono de lectura:** Solo símbolo si directorio es de solo lectura
-
-### Herramientas y Entornos ✅
-- **Docker:** Detecta automáticamente proyectos Docker
-- **Conda/Python:** Entornos virtuales y versiones activas
-- **Lenguajes:** Node.js, Python, Rust, Go con caracteres Nerd Font
-
-### Información de Ejecución ✅
-- **Timestamp:** Hora en tiempo real (HH:MM:SS)
-- **Duración:** Tiempo que tardó cada comando (> 500ms)
-- **Status:** Indicador visual de éxito/error (✘)
-
-### Separadores ✅
-- Separadores elegantes (│) entre bloques principales
-- Mejora legibilidad visual del prompt
-- Organización clara de secciones
-
-## Caracteres Nerd Font Utilizados
-
-### Símbolos de Git Status
 ```
-✘ = Conflicto/Error
-! = Modificado
-+ = Staged
-? = Sin seguimiento
-* = Stashed
-» = Renombrado
+diego on diego-server in ~/ruta ║  main ●+? 14:32
+                                ║
+                    Separador entre contexto y rama Git
 ```
 
-### Entrada y Flechas
+## Símbolos Git Status - Explicados Claramente
+
+Cuando estés en un repositorio Git, verás símbolos que indican el estado de tus cambios:
+
+### Estados de Archivos
+
+| Símbolo | Significado | Ejemplo |
+|---------|-------------|---------|
+| `●` | **Modificado**: Archivos con cambios no guardados | Editaste un archivo |
+| `+` | **Staged**: Cambios preparados para commit | Ya hiciste `git add` |
+| `✖` | **Deletado**: Archivos eliminados | Borraste un archivo |
+| `»` | **Renombrado**: Archivo cambió de nombre | Renombraste algo |
+| `?` | **Sin seguimiento**: Archivos nuevos | Archivo nuevo no rastreado |
+| `*` | **Stashed**: Cambios guardados en stash | Guardaste cambios temporales |
+| `⚔` | **Conflicto**: Conflicto de merge | Hay conflictos sin resolver |
+
+### Estados de Sincronización con Remoto
+
+| Símbolo | Significado | Ejemplo |
+|---------|-------------|---------|
+| `↑1` | **Commits adelante**: Tu rama va 1 commit adelante | Hiciste commits sin push |
+| `↓2` | **Commits atrás**: Tu rama va 2 commits atrás | Hay cambios en remoto |
+| `↕ ↑1 ↓1` | **Diverged**: Ambas ramas tienen cambios | Necesitas sincronizar |
+
+## Ejemplos Visuales
+
+### Repositorio Limpio (sin cambios)
 ```
-➜ = Flecha moderna (éxito)
-✘ = Equis (error)
+diego on diego-server in ~/proyecto ║  main 14:32
+➜ 
 ```
 
-### Separadores
+### Con Cambios Modificados
 ```
-│ = Pipe elegante
+diego on diego-server in ~/proyecto ║  main ● 14:32
+➜ 
 ```
+(● significa hay archivos modificados)
+
+### Con Cambios Staged y Modificados
+```
+diego on diego-server in ~/proyecto ║  main ●+ 14:32
+➜ 
+```
+(● = modificados, + = staged)
+
+### Con Commits Pendientes
+```
+diego on diego-server in ~/proyecto ║  main ↑2 14:32
+➜ 
+```
+(↑2 significa 2 commits adelante del remoto)
 
 ## Personalización
 
@@ -96,16 +106,25 @@ min_time = 500  # En milisegundos
 ### Cambiar formato de hora
 En `[time]`, modificar:
 ```toml
-time_format = "%H:%M:%S"  # Otros: %Y-%m-%d, %I:%M %p, etc.
+time_format = "%H:%M"     # Solo hora (actual)
+time_format = "%H:%M:%S"  # Con segundos
+time_format = "%d/%m"     # Solo fecha
 ```
 
-### Cambiar símbolos de git
-En `[git_status]`, modificar:
+### Cambiar símbolos de Git
+En `[git_status]`, puedes personalizar:
 ```toml
-modified = "!"
-staged = "+"
-deleted = "✘"
-# etc...
+modified = "●"      # Cambiar ● por otro símbolo
+staged = "+"        # Cambiar + por otro símbolo
+deleted = "✖"       # Cambiar ✖ por otro símbolo
+# ... etc
+```
+
+### Cambiar separadores
+En cada módulo puedes cambiar `║` por otro símbolo:
+```toml
+[git_branch]
+format = " ▸ [$symbol$branch]($style)"  # Usa ▸ en lugar de ║
 ```
 
 ### Cambiar colores
