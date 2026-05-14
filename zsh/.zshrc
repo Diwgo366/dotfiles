@@ -23,11 +23,6 @@ fi
 # Inicializar Starship prompt
 eval "$(~/.local/bin/starship init zsh)"
 
-# Hook para actualizar la hora con café antes de cada prompt
-precmd() {
-    update_time_with_coffee
-}
-
 # ===============================================================
 # MENSAJE DE BIENVENIDA
 # ===============================================================
@@ -38,9 +33,11 @@ if [[ $- == *i* ]]; then
         local hour=$(date +%H)
         local greeting
         local icon
-        local coffee=""
         
-        if (( hour < 12 )); then
+        if (( hour < 7 )); then
+            greeting="Buenas noches"
+            icon="🌙"  # Luna
+        elif (( hour < 12 )); then
             greeting="Buenos días"
             icon="🌅"  # Salida del sol
         elif (( hour < 18 )); then
@@ -49,11 +46,10 @@ if [[ $- == *i* ]]; then
         else
             greeting="Buenas noches"
             icon="🌙"  # Luna
-            coffee=" ☕"  # Agregamos café en la noche
         fi
         
         echo "╔════════════════════════════════════════════════════════╗"
-        echo "║ $icon $greeting, $(whoami)!$coffee"
+        echo "║ $icon $greeting, $(whoami)!"
         echo "║ ▸ Sistema: $(uname -s) ║ Terminal: zsh"
         echo "╚════════════════════════════════════════════════════════╝"
     }

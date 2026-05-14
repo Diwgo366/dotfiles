@@ -35,7 +35,7 @@ success_symbol = "[▸](bold green)"
 [time]
 disabled = false
 style = "bold green"
-format = "[$ENV{TIME_WITH_COFFEE}]($style) "
+format = "[$time]($style) "
 time_format = "%H:%M"
 
 [username]
@@ -73,7 +73,7 @@ symbol = " "
 [git_status]
 style = "bold red"
 format = " [$all_status$ahead_behind]($style)"
-# Estados de Git con símbolos elegantes:
+# Estados de Git con símbolos elegantes (con espacios entre ellos):
 # ●  = Modificado (archivo editado, no guardado)
 # ⊕  = Staged (cambios preparados para commit)
 # ⊖  = Deletado (archivo eliminado)
@@ -81,16 +81,16 @@ format = " [$all_status$ahead_behind]($style)"
 # ◯  = Sin seguimiento (archivo nuevo no rastreado)
 # ◎  = Stashed (cambios guardados temporalmente)
 # ✕  = Conflicto (conflicto de merge sin resolver)
-conflicted = "✕"
-ahead = "⇧${count}"
-behind = "⇩${count}"
-diverged = "⇳ ⇧${ahead_count} ⇩${behind_count}"
-untracked = "◯"
-stashed = "◎"
-modified = "●"
-staged = "⊕"
-renamed = "⟳"
-deleted = "⊖"
+conflicted = "✕ "
+ahead = " ⇧${count}"
+behind = " ⇩${count}"
+diverged = " ⇳ ⇧${ahead_count} ⇩${behind_count}"
+untracked = " ◯"
+stashed = " ◎"
+modified = " ●"
+staged = " ⊕"
+renamed = " ⟳"
+deleted = " ⊖"
 
 [docker_context]
 style = "bold blue"
