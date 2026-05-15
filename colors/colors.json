@@ -1,0 +1,35 @@
+{
+  "name": "custom_dotfiles",
+  "description": "Paleta Personalizada de Dotfiles",
+  "structural": {
+    "background":   "#282a36",
+    "current_line": "#44475a",
+    "foreground":   "#f8f8f2",
+    "comment":      "#6272a4"
+  },
+  "ansi": {
+    "color0":  "#262626",
+    "color1":  "#E64747",
+    "color2":  "#42E66C",
+    "color3":  "#E4F34A",
+    "color4":  "#9B6BDF",
+    "color5":  "#E356A7",
+    "color6":  "#75D7EC",
+    "color7":  "#EFA554",
+    "color8":  "#7A7A7A",
+    "color9":  "#FF5555",
+    "color10": "#50FA7B",
+    "color11": "#F1FA8C",
+    "color12": "#BD93F9",
+    "color13": "#ff79c6",
+    "color14": "#8BE9FD",
+    "color15": "#FFB86C"
+  },
+
+  "semantic": {
+    "error": "#ff5555",
+    "warning": "#f1fa8c",
+    "success": "#50fa7b",
+    "info": "#8be9fd"
+  }
+}

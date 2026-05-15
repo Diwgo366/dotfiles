@@ -2,11 +2,12 @@
 # CONFIGURACIÓN DE ZSH - ARCHIVO PRINCIPAL
 # ===============================================================
 # ESTRUCTURA MODULAR:
-# - 00-paths.zsh: Variables de entorno y PATHs
+# - 00-colors.zsh: Definición de colores
 # - 10-aliases.zsh: Alias y atajos de comandos
 # - 20-functions.zsh: Funciones personalizadas
-# - 30-zsh-config.zsh: Configuraciones específicas de zsh
-# - 40-ohmyzsh.zsh: Configuraciones específicas de Oh My Zsh
+# - 30-paths.zsh: Variables de entorno y PATHs
+# - 40-plugins.zsh: Configuraciones de plugins
+# - 50-zsh-config.zsh: Configuraciones específicas de zsh
 # ===============================================================
 
 # ===============================================================

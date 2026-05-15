@@ -38,14 +38,6 @@ setopt CORRECT                  # Spell correction for commands
 export CLICOLOR=1
 export CLICOLOR_FORCE=1
 
-# Configuración de colores para ls (LS_COLORS)
-# Formato: type=color
-# Colores: 30=black, 31=red, 32=green, 33=yellow, 34=blue, 35=magenta, 36=cyan, 37=white
-# Estilos: bold=1, dim=2, normal=0
-export LS_COLORS='di=34:fi=37:ln=36:or=31:ex=32:*.txt=37:*.md=37:*.json=33:*.yml=33:*.yaml=33'
+# Cargar esquema de colores para ls (diferencia archivos, carpetas, etc.)
+[[ -z "$LS_COLORS" ]] && command -v dircolors &>/dev/null && eval "$(dircolors -b)"
 
-# Alias mejorado para ls con colores (Linux)
-alias ls='ls --color=auto'                # Enable colors
-alias la='ls -lA --color=auto'            # All files with long format
-alias ll='ls -lh --color=auto'            # Long format with human readable sizes
-alias ld='ls -ld --color=auto */'         # Only directories

@@ -5,7 +5,7 @@
 # Layout: 2 líneas (Hora + Contexto en L1, Entrada en L2)
 # ====================================================================
 
-palette = "dracula"
+palette = 'custom_dotfiles'
 format = """
 $time\
 $username\
@@ -35,19 +35,19 @@ success_symbol = "[▸](bold green)"
 [time]
 disabled = false
 style = "bold green"
-format = "[$time]($style)"
+format = "[ $time]($style)"
 time_format = "%H:%M"
 
 [username]
 show_always = true
-format = " ║ [$user]($style)"
+format = " ║ [ $user]($style)"
 style_user = "bold cyan"
 style_root = "bold red"
 
 [hostname]
-ssh_only = true
-ssh_symbol = " "
-format = " ◈ [$hostname]($style)"
+ssh_only = false
+ssh_symbol = ""
+format = " [  $hostname]($style)"
 style = "bold pink"
 
 [directory]
@@ -60,15 +60,18 @@ read_only_style = "bold red"
 home_symbol = "~"
 
 [directory.substitutions]
-"Documents" = " "
-"Downloads" = " "
-"Music" = " "
-"Pictures" = " "
+"Documentos" = " "
+"Descargas" = " "
+"Música" = " "
+"Imágenes" = " "
+"Vídeos" = " "
+"Scripts" = " "
+"Dotfiles" = " "
 
 [git_branch]
 style = "bold orange"
 format = " ║ [$symbol$branch]($style)"
-symbol = " "
+symbol = " "
 
 [git_status]
 format = " [$all_status$ahead_behind]($style)"
@@ -93,19 +96,15 @@ deleted = "[ ⊖](bold red)"
 
 [docker_context]
 style = "bold blue"
-format = " ║ [🐳 $context]($style)"
+format = " ║ [$symbol$context]($style)"
 only_with_files = true
 detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+symbol = " "
 
 [python]
 style = "bold yellow"
-format = " ║ [🐍 $version]($style)"
-symbol = ""
-
-[lua]
-style = "bold cyan"
-format = " ║ [🌙 $version]($style)"
-symbol = ""
+format = " ║ [$symbol$version]($style)"
+symbol = " "
 
 # ====================================================================
 # LÍNEA 2: INFORMACIÓN DEL COMANDO
@@ -114,31 +113,31 @@ symbol = ""
 [cmd_duration]
 min_time = 500
 style = "bold yellow"
-format = "[$duration]($style)"
+format = "[ $duration]($style) "
 
 [status]
 style = "bold red"
-symbol = "✕"
-success_symbol = ""
+success_style = "bold green"
+symbol = "✕ "
+success_symbol = "✓ "
 format = " [$symbol]($style)"
 map_symbol = true
 disabled = false
 pipestatus = true
 
-# ====================================================================
-# PALETA DE COLORES - DRACULA
-# ====================================================================
-[palettes.dracula]
-background = "#282a36"
-current_line = "#44475a"
-foreground = "#f8f8f2"
-comment = "#6272a4"
-cyan = "#8be9fd"
-green = "#50fa7b"
-orange = "#ffb86c"
+
+# ==============================================================
+# Colores generados por colors/themes/starship.sh
+# ==============================================================
+[palettes.custom_dotfiles]
+purple = "#BD93F9"
 pink = "#ff79c6"
-purple = "#bd93f9"
-red = "#ff5555"
-yellow = "#f1fa8c"
+orange = "#FFB86C"
+cyan = "#8BE9FD"
+green = "#50FA7B"
+red = "#FF5555"
+yellow = "#F1FA8C"
+blue = "#75D7EC"
+magenta = "#E356A7"
 white = "#f8f8f2"
-blue = "#8be9fd"
+black = "#262626"

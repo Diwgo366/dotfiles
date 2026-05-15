@@ -1,3 +1,4 @@
+-- Configuración de barbar (buffer tabs)
 require'barbar'.setup {
 	animation = true,
 	clickable = true,
@@ -9,7 +10,7 @@ require'barbar'.setup {
 	icons = {
 		buffer_index = false,
 		buffer_number = false,
-		button = '',
+		button = '',
 		diagnostics = {
 		  [vim.diagnostic.severity.ERROR] = {enabled = true, icon = 'ﬀ'},
 		  [vim.diagnostic.severity.WARN] = {enabled = false},
@@ -28,7 +29,7 @@ require'barbar'.setup {
 		separator = {left = '▎', right = ''},
 		separator_at_end = true,
 		modified = {button = '●'},
-		pinned = {button = '', filename = true},
+		pinned = {button = '', filename = true},
 		preset = 'default',
 		alternate = {filetype = {enabled = false}},
 		current = {buffer_index = true},
