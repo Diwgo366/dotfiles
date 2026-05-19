@@ -50,3 +50,19 @@ mkcd() {
 download() {
     curl -# -O "$1"
 }
+
+pdfview() {
+  local p=1
+  while :; do
+    clear
+    pdftoppm -png -f $p -l $p "$1" /tmp/pdfpic
+    kitty +kitten icat "/tmp/pdfpic-$p.png"
+    rm -f /tmp/pdfpic-*.png
+    echo "Página $p | n:sig p:ant q:salir"
+    read -k1 k
+    [[ $k == n ]] && ((p++))
+    [[ $k == p && p -gt 1 ]] && ((p--))
+    [[ $k == q ]] && break
+  done
+}
+

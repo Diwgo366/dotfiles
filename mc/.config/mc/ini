@@ -4,8 +4,9 @@ shell_patterns=true
 auto_save_setup=true
 preallocate_space=false
 auto_menu=false
-use_internal_view=true
+use_internal_view=false
 use_internal_edit=false
+editor=nvim
 clear_before_exec=true
 confirm_delete=true
 confirm_overwrite=true
@@ -86,7 +87,7 @@ skin=custom_dotfiles
 
 [Layout]
 output_lines=0
-left_panel_size=73
+left_panel_size=18
 top_panel_size=0
 message_visible=true
 keybar_visible=true

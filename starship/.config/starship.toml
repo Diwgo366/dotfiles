@@ -10,11 +10,11 @@ format = """
 $time\
 $username\
 $hostname\
+$python\
 $directory\
 $git_branch\
 $git_status\
 $docker_context\
-$python\
 $lua\
 $line_break\
 $cmd_duration\
@@ -103,8 +103,13 @@ symbol = " "
 
 [python]
 style = "bold yellow"
-format = " ║ [$symbol$version]($style)"
+format = " ║ [$symbol$virtualenv]($style)[$version]($style)"
 symbol = " "
+detect_extensions = ["py"]
+detect_folders = [".venv", "venv", "virtualenv", ".python-version"]
+
+[lua]
+disabled = true
 
 # ====================================================================
 # LÍNEA 2: INFORMACIÓN DEL COMANDO
@@ -126,6 +131,12 @@ disabled = false
 pipestatus = true
 
 
+# ==============================================================
+# Colores generados por colors/themes/starship.sh
+# ==============================================================
+# ==============================================================
+# Colores generados por colors/themes/starship.sh
+# ==============================================================
 # ==============================================================
 # Colores generados por colors/themes/starship.sh
 # ==============================================================

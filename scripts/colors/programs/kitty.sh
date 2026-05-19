@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#/usr/bin/env bash
 # Tema de colores para Kitty
 
 set -euo pipefail
@@ -20,6 +20,10 @@ main() {
         echo "# Colores generados por colors/themes/kitty.sh"
         echo "# =============================================================="
         echo ""
+		echo "hide_window_decorations yes"
+		echo "draw_minimal_borders no"
+		echo "background_blur 30"
+		echo ""
         echo "background $BACKGROUND"
         echo "foreground $FOREGROUND"
         echo "selection_background $CURRENT_LINE"
@@ -34,10 +38,9 @@ main() {
         done
         echo ""
         echo "active_border_color $COLOR4"
-        echo "tab_bar_background $BACKGROUND"
-        echo "tab_bar_margin_color $CURRENT_LINE"
         echo "active_tab_foreground $BACKGROUND"
         echo "active_tab_background $COLOR4"
+		echo "inactive_border_color $CURRENT_LINE"
         echo "inactive_tab_foreground $COMMENT"
         echo "inactive_tab_background $CURRENT_LINE"
     } > "$OUTPUT_FILE"

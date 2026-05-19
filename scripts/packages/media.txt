@@ -1,0 +1,4 @@
+# Aplicaciones multimedia
+vlc
+pavucontrol
+pulseaudio-utils

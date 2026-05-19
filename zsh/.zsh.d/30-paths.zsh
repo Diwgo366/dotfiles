@@ -27,6 +27,9 @@ nvm() {
   nvm "$@"
 }
 
+# Kitty
+export PATH="$HOME/.local/kitty.app/bin:$PATH"
+
 # SAC (Código de Análisis Sísmico)
 if [[ -d "$HOME/sismica/sac/bin" ]]; then
     path=("$HOME/sismica/sac/bin" $path)

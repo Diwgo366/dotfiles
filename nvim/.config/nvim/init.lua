@@ -22,6 +22,7 @@ package.path = home .. '/.config/nvim/lua/?.lua;' .. package.path
 -- Cargar configuración
 require 'config.theme'
 require 'config.common'
+require 'config.keymaps'
 
 -- Cargar plugins
 require 'plugins.nvim-tree'

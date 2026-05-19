@@ -18,10 +18,8 @@ require('nvim-tree').setup({
   },
 
   filters = {
-    dotfiles = true,
+    dotfiles = false,
   }
 })
 
--- Keybindings
-vim.g.mapleader = ' '
-vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>')
+

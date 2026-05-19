@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-THEMES_DIR="$SCRIPT_DIR/colors/themes"
+THEMES_DIR="$SCRIPT_DIR/colors/programs"
 
 # Códigos de color
 RED='\033[0;31m'

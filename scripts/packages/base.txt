@@ -1,0 +1,14 @@
+# Paquetes base / esenciales
+git
+curl
+wget
+btop
+fastfetch
+zsh
+tree
+unzip
+zip
+gzip
+tar
+eza
+starship

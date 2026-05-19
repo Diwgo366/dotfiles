@@ -10,6 +10,8 @@
 # - 50-zsh-config.zsh: Configuraciones específicas de zsh
 # ===============================================================
 
+export TERMINAL=kitty
+
 # ===============================================================
 # CARGAR MÓDULOS PERSONALIZADOS
 # ===============================================================
@@ -30,7 +32,7 @@ eval "$(~/.local/bin/starship init zsh)"
 
 # Mostrar mensaje solo en shells interactivos
 if [[ $- == *i* ]]; then
-    WIDTH=56
+    WIDTH=$(( COLUMNS - 2 ))
 
     _center() {
         local text="$1"

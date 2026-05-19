@@ -1,13 +1,7 @@
 local colors = require('utils.colors')
 
 local function hl(group, opts)
-  opts = opts or {}
-  local cmd = 'highlight ' .. group
-  if opts.fg then cmd = cmd .. ' guifg=' .. opts.fg end
-  if opts.bg then cmd = cmd .. ' guibg=' .. opts.bg end
-  if opts.attr then cmd = cmd .. ' gui=' .. opts.attr end
-  if opts.sp then cmd = cmd .. ' guisp=' .. opts.sp end
-  vim.cmd(cmd)
+  vim.api.nvim_set_hl(0, group, opts or {})
 end
 
 -- =============================================================
@@ -23,7 +17,7 @@ hl('EndOfBuffer', { fg = colors.comment })
 -- LINE NUMBERS
 -- =============================================================
 hl('LineNr', { fg = colors.line_nr })
-hl('CursorLineNr', { fg = colors.cursor_line_nr, attr = 'bold' })
+hl('CursorLineNr', { fg = colors.cursor_line_nr, bold = true })
 hl('CursorLine', { bg = colors.current_line })
 hl('CursorColumn', { bg = colors.current_line })
 hl('SignColumn', { })
@@ -34,9 +28,9 @@ hl('ColorColumn', { bg = colors.current_line })
 -- =============================================================
 hl('Visual', { fg = colors.bg, bg = colors.purple })
 hl('VisualNOS', { fg = colors.bg, bg = colors.purple })
-hl('Search', { fg = colors.bg, bg = colors.yellow, attr = 'bold' })
-hl('IncSearch', { fg = colors.bg, bg = colors.orange, attr = 'bold' })
-hl('Substitute', { fg = colors.bg, bg = colors.pink, attr = 'bold' })
+hl('Search', { fg = colors.bg, bg = colors.yellow, bold = true })
+hl('IncSearch', { fg = colors.bg, bg = colors.orange, bold = true })
+hl('Substitute', { fg = colors.bg, bg = colors.pink, bold = true })
 
 -- =============================================================
 -- UI ELEMENTS
@@ -46,13 +40,13 @@ hl('WinSeparator', { fg = colors.border })
 hl('StatusLine', { fg = colors.fg, bg = colors.current_line })
 hl('StatusLineNC', { fg = colors.comment })
 hl('TabLine', { fg = colors.comment })
-hl('TabLineSel', { fg = colors.fg, bg = colors.current_line, attr = 'bold' })
+hl('TabLineSel', { fg = colors.fg, bg = colors.current_line, bold = true })
 hl('TabLineFill', { })
 
 -- =============================================================
 -- SYNTAX BASE
 -- =============================================================
-hl('Comment', { fg = colors.comment, attr = 'italic' })
+hl('Comment', { fg = colors.comment, italic = true })
 hl('String', { fg = colors.yellow })
 hl('StringDelimiter', { fg = colors.yellow })
 hl('Character', { fg = colors.green })
@@ -63,26 +57,26 @@ hl('Float', { fg = colors.orange })
 -- =============================================================
 -- OPERATORS & KEYWORDS
 -- =============================================================
-hl('Operator', { fg = colors.pink })
+hl('Operator', { fg = colors.purple })
 hl('Keyword', { fg = colors.pink })
 hl('Statement', { fg = colors.pink })
 hl('Conditional', { fg = colors.pink })
 hl('Repeat', { fg = colors.pink })
-hl('Label', { fg = colors.pink })
+hl('Label', { fg = colors.orange })
 hl('Exception', { fg = colors.pink })
 
 -- =============================================================
 -- TYPES & STRUCTURES
 -- =============================================================
 hl('Type', { fg = colors.cyan })
-hl('StorageClass', { fg = colors.pink })
+hl('StorageClass', { fg = colors.purple })
 hl('Structure', { fg = colors.cyan })
 hl('Typedef', { fg = colors.cyan })
-hl('PreProc', { fg = colors.pink })
-hl('Include', { fg = colors.pink })
-hl('Define', { fg = colors.pink })
-hl('Macro', { fg = colors.pink })
-hl('PreCondit', { fg = colors.pink })
+hl('PreProc', { fg = colors.purple })
+hl('Include', { fg = colors.purple })
+hl('Define', { fg = colors.purple })
+hl('Macro', { fg = colors.orange })
+hl('PreCondit', { fg = colors.purple })
 
 -- =============================================================
 -- FUNCTIONS & IDENTIFIERS
@@ -92,17 +86,17 @@ hl('FunctionBuiltin', { fg = colors.cyan })
 hl('Identifier', { fg = colors.fg })
 hl('Variable', { fg = colors.fg })
 hl('Constant', { fg = colors.orange })
-hl('SpecialChar', { fg = colors.pink })
-hl('Tag', { fg = colors.pink })
+hl('SpecialChar', { fg = colors.orange })
+hl('Tag', { fg = colors.orange })
 hl('Special', { fg = colors.purple })
-hl('SpecialComment', { fg = colors.comment, attr = 'italic' })
+hl('SpecialComment', { fg = colors.comment, italic = true })
 
 -- =============================================================
 -- ERRORS, WARNINGS, INFO
 -- =============================================================
-hl('Error', { fg = colors.error, attr = 'bold,underline' })
-hl('ErrorMsg', { fg = colors.error, attr = 'bold' })
-hl('WarningMsg', { fg = colors.warning, attr = 'bold' })
+hl('Error', { fg = colors.error, bold = true, underline = true })
+hl('ErrorMsg', { fg = colors.error, bold = true })
+hl('WarningMsg', { fg = colors.warning, bold = true })
 hl('Question', { fg = colors.green })
 hl('MoreMsg', { fg = colors.green })
 hl('ModeMsg', { fg = colors.cyan })
@@ -110,10 +104,10 @@ hl('ModeMsg', { fg = colors.cyan })
 -- =============================================================
 -- SPELLING
 -- =============================================================
-hl('SpellBad', { sp = colors.error, attr = 'undercurl' })
-hl('SpellCap', { sp = colors.warning, attr = 'undercurl' })
-hl('SpellRare', { sp = colors.hint, attr = 'undercurl' })
-hl('SpellLocal', { sp = colors.info, attr = 'undercurl' })
+hl('SpellBad', { sp = colors.error, undercurl = true })
+hl('SpellCap', { sp = colors.warning, undercurl = true })
+hl('SpellRare', { sp = colors.hint, undercurl = true })
+hl('SpellLocal', { sp = colors.info, undercurl = true })
 
 -- =============================================================
 -- FOLDING
@@ -127,7 +121,7 @@ hl('FoldColumn', { fg = colors.comment })
 hl('DiffAdd', { fg = colors.green })
 hl('DiffChange', { fg = colors.yellow })
 hl('DiffDelete', { fg = colors.red })
-hl('DiffText', { fg = colors.cyan, attr = 'underline' })
+hl('DiffText', { fg = colors.cyan, underline = true })
 
 -- =============================================================
 -- COMPLETION MENU
@@ -156,7 +150,7 @@ hl('MsgSeparator', { fg = colors.border })
 -- =============================================================
 hl('Todo', { fg = colors.bg, bg = colors.orange })
 hl('Attention', { fg = colors.bg, bg = colors.red })
-hl('Underlined', { attr = 'underline' })
+hl('Underlined', { underline = true })
 hl('Conceal', { fg = colors.comment })
 hl('Ignore', { fg = colors.comment })
 hl('Whitespace', { fg = colors.comment })
@@ -190,31 +184,31 @@ hl('TSProperty', { fg = colors.fg })
 hl('TSConstructor', { fg = colors.cyan })
 hl('TSConditional', { fg = colors.pink })
 hl('TSRepeat', { fg = colors.pink })
-hl('TSLabel', { fg = colors.pink })
+hl('TSLabel', { fg = colors.orange })
 hl('TSKeyword', { fg = colors.pink })
 hl('TSKeywordFunction', { fg = colors.pink })
-hl('TSKeywordOperator', { fg = colors.pink })
-hl('TSOperator', { fg = colors.pink })
+hl('TSKeywordOperator', { fg = colors.purple })
+hl('TSOperator', { fg = colors.purple })
 hl('TSException', { fg = colors.pink })
 hl('TSType', { fg = colors.cyan })
 hl('TSTypeBuiltin', { fg = colors.cyan })
 hl('TSStructure', { fg = colors.cyan })
-hl('TSInclude', { fg = colors.pink })
+hl('TSInclude', { fg = colors.purple })
 hl('TSVariable', { fg = colors.fg })
-hl('TSVariableBuiltin', { fg = colors.pink })
+hl('TSVariableBuiltin', { fg = colors.purple })
 hl('TSText', { fg = colors.fg })
-hl('TSStrong', { attr = 'bold' })
-hl('TSEmphasis', { attr = 'italic' })
-hl('TSUnderline', { attr = 'underline' })
-hl('TSStrike', { attr = 'strikethrough' })
+hl('TSStrong', { bold = true })
+hl('TSEmphasis', { italic = true })
+hl('TSUnderline', { underline = true })
+hl('TSStrike', { strikethrough = true })
 hl('TSTitle', { fg = colors.cyan })
 hl('TSLiteral', { fg = colors.yellow })
-hl('TSURI', { fg = colors.cyan, attr = 'underline' })
-hl('TSComment', { fg = colors.comment, attr = 'italic' })
+hl('TSURI', { fg = colors.cyan, underline = true })
+hl('TSComment', { fg = colors.comment, italic = true })
 hl('TSAnnotation', { fg = colors.purple })
 hl('TSAttribute', { fg = colors.purple })
 hl('TSNamespace', { fg = colors.cyan })
-hl('TSTag', { fg = colors.pink })
+hl('TSTag', { fg = colors.orange })
 hl('TSTagDelimiter', { fg = colors.comment })
 hl('TSNote', { fg = colors.bg, bg = colors.info })
 hl('TSWarning', { fg = colors.bg, bg = colors.warning })
@@ -222,27 +216,27 @@ hl('TSDanger', { fg = colors.bg, bg = colors.error })
 hl('TSMath', { fg = colors.orange })
 
 -- =============================================================
--- BARBAR.NVIM (TABS)
+-- BARBAR.NVIM (TABS) — estilo navegador
 -- =============================================================
+hl('BufferLineFill', { })
 hl('BufferLineBackground', { fg = colors.comment })
 hl('BufferLineBuffer', { fg = colors.comment })
 hl('BufferLineBufferVisible', { fg = colors.fg })
 hl('BufferLineBufferSelected', { fg = colors.fg, bg = colors.current_line })
-hl('BufferLineModified', { fg = colors.warning })
-hl('BufferLineModifiedSelected', { fg = colors.warning })
-hl('BufferLineModifiedVisible', { fg = colors.warning })
-hl('BufferLineIndicator', { fg = colors.purple, bg = colors.current_line })
-hl('BufferLineIndicatorSelected', { fg = colors.purple, bg = colors.current_line })
+hl('BufferLineIndicator', { fg = colors.purple, bg = colors.current_line, bold = true })
+hl('BufferLineIndicatorSelected', { fg = colors.purple, bg = colors.current_line, bold = true })
 hl('BufferLineTab', { fg = colors.comment })
-hl('BufferLineTabSelected', { fg = colors.cyan })
+hl('BufferLineTabSelected', { fg = colors.cyan, bold = true })
 hl('BufferLineTabpage', { fg = colors.comment })
 hl('BufferLineTabpageSelected', { fg = colors.fg, bg = colors.current_line })
-hl('BufferLineFill', { })
-hl('BufferLineSeparator', { })
-hl('BufferLineSeparatorSelected', { })
-hl('BufferLineSeparatorVisible', { })
+hl('BufferLineSeparator', { fg = colors.border })
+hl('BufferLineSeparatorSelected', { fg = colors.border })
+hl('BufferLineSeparatorVisible', { fg = colors.border })
 hl('BufferLineOffsetSeparator', { fg = colors.border })
 hl('BufferLineGroupSeparator', { fg = colors.border })
+hl('BufferLineModified', { fg = colors.warning })
+hl('BufferLineModifiedSelected', { fg = colors.warning, bold = true })
+hl('BufferLineModifiedVisible', { fg = colors.warning })
 hl('BufferLineDuplicate', { fg = colors.comment })
 hl('BufferLineDuplicateSelected', { fg = colors.fg })
 hl('BufferLineDuplicateVisible', { fg = colors.fg })
@@ -275,7 +269,7 @@ hl('NvimTreeFileNameOpened', { fg = colors.cyan })
 hl('NvimTreeSpecialFile', { fg = colors.yellow })
 hl('NvimTreeExecFile', { fg = colors.green })
 hl('NvimTreeImageFile', { fg = colors.purple })
-hl('NvimTreeSymlink', { fg = colors.cyan, attr = 'italic' })
+hl('NvimTreeSymlink', { fg = colors.cyan, italic = true })
 hl('NvimTreeFolderArrowOpen', { fg = colors.purple })
 hl('NvimTreeFolderArrowClosed', { fg = colors.purple })
 hl('NvimTreeGitDirty', { fg = colors.yellow })

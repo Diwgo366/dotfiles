@@ -13,7 +13,6 @@ vim.cmd([[
   highlight StatusLine guibg=NONE ctermbg=NONE
   highlight StatusLineNC guibg=NONE ctermbg=NONE
   highlight TabLineFill guibg=NONE ctermbg=NONE
-  highlight BufferLineFill guibg=NONE ctermbg=NONE
 ]])
 
 vim.opt.number = true
