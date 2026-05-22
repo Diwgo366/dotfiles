@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=mi-tema-gtk
+Comment=Tema oscuro plano con acento purpura
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=mi-tema-gtk
+MetacityTheme=mi-tema-gtk
+IconTheme=Papirus
+CursorTheme=Future-cyan-cursors
+ButtonLayout=menu:minimize,maximize,close

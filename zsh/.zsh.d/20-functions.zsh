@@ -57,32 +57,67 @@ pdfview() {
     return 1
   fi
 
-  if [[ "$TERM" != *kitty* ]] || [[ ! -t 0 ]]; then
-    if command -v evince &>/dev/null; then
-      evince "$1"
-    elif command -v okular &>/dev/null; then
-      okular "$1"
-    else
-      echo "No hay un visor PDF disponible. Instalá evince u okular."
-      return 1
-    fi
-    return
-  fi
+  command -v pdftoppm &>/dev/null || { echo "Error: pdftoppm no encontrado."; return 1; }
+  command -v kitty &>/dev/null || { echo "Error: kitty no encontrado."; return 1; }
 
-  local p=1
-  while :; do
-    clear
-    if ! pdftoppm -png -f "$p" -l "$p" "$1" /tmp/pdfpic 2>/dev/null; then
-      echo "Error al procesar el PDF"
-      return 1
+  local total=$(pdfinfo "$1" 2>/dev/null | awk '/^Pages:/{print $2}')
+  total=${total:-1}
+
+  local p=1 tmpdir="/tmp/pdfview_$$"
+  mkdir -p "$tmpdir"
+  trap "rm -rf $tmpdir" EXIT
+
+  # Array de modos de ajuste
+  local -a fit_modes=(both width height none)
+  local -a fit_labels=("↔↕" "↔" "↕" "□")
+  local fit_idx=1
+
+  while true; do
+    local imgfile="$tmpdir/page-${p}.png"
+    
+    # Generar PNG solo si no existe
+    if [[ ! -f "$imgfile" ]]; then
+      pdftoppm -png -f "$p" -l "$p" "$1" "$tmpdir/page" 2>/dev/null
+      if [[ ! -f "$imgfile" ]]; then
+        echo "Error al procesar página $p"
+        return 1
+      fi
     fi
-    kitty +kitten icat "/tmp/pdfpic-$p.png" 2>/dev/null
-    rm -f /tmp/pdfpic-*.png
-    echo "Página $p | n:sig p:ant q:salir"
-    read -k1 k
-    [[ $k == n ]] && ((p++))
-    [[ $k == p && p -gt 1 ]] && ((p--))
-    [[ $k == q ]] && break
+
+    # Mostrar imagen con kitty
+    if [[ "${fit_modes[$fit_idx]}" == "none" ]]; then
+      kitty +kitten icat "$imgfile" < /dev/null
+    else
+      kitty +kitten icat --fit "${fit_modes[$fit_idx]}" "$imgfile" < /dev/null
+    fi
+
+    # Prompt
+    printf "\nPágina %d/%d [%s] — n:sig  p:ant  f:fit  q:salir: " "$p" "$total" "${fit_labels[$fit_idx]}"
+    
+    # Leer una tecla (zsh nativo)
+    read -k key
+    printf "\n"
+    
+    # Procesar entrada
+    case "$key" in
+      n)
+        if [[ $p -lt $total ]]; then
+          ((p++))
+        fi
+        ;;
+      p)
+        if [[ $p -gt 1 ]]; then
+          ((p--))
+        fi
+        ;;
+      f)
+        fit_idx=$(( fit_idx % 4 + 1 ))
+        ;;
+      q)
+        break
+        ;;
+    esac
   done
 }
+
 
