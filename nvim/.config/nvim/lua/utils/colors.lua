@@ -1,25 +1,25 @@
--- =============================================================
---  Colores generados por colors/themes/nvim.sh
--- =============================================================
+-- ========================================================
+--  Colores generados automaticamente
+-- ========================================================
 
 local colors = {
   -- Colores base
   bg              = '#282a36',  -- Fondo principal
   fg              = '#f8f8f2',  -- Texto principal
-  current_line    = '#44475a',  -- Línea actual (más claro que bg)
+  current_line    = '#44475a',  -- Línea actual
   selection       = '#44475a',  -- Selección
   comment         = '#6272a4',  -- Comentarios
   
-  -- Colores primarios (ANSI 1-7)
-  red             = '#FF5555',  -- Rojo brillante
-  green           = '#50FA7B',  -- Verde brillante
-  yellow          = '#F1FA8C',  -- Amarillo brillante
-  purple          = '#BD93F9',  -- Púrpura brillante
-  pink            = '#ff79c6',  -- Rosa brillante
-  cyan            = '#8BE9FD',  -- Cyan brillante
-  orange          = '#FFB86C',  -- Naranja brillante
+  -- Colores primarios
+  red             = '#FF5555',
+  green           = '#50FA7B',
+  yellow          = '#F1FA8C',
+  purple          = '#BD93F9',
+  pink            = '#ff79c6',
+  cyan            = '#8BE9FD',
+  orange          = '#FFB86C',
   
-  -- Colores secundarios (ANSI 0-7)
+  -- Colores secundarios
   dark_red        = '#E64747',
   dark_green      = '#42E66C',
   dark_yellow     = '#E4F34A',

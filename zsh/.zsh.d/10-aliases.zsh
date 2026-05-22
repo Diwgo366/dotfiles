@@ -9,6 +9,9 @@ alias icat='kitten icat'
 alias ..='cd ..'
 alias ...='cd ../..'
 
+# === Funcionalidades ===
+alias rm='rm -i'
+
 # === Listados ===
 alias ls='eza --icons'
 alias ll='eza -alh --icons --group-directories-first'
@@ -18,7 +21,14 @@ alias lsd='eza -D --icons'
 
 # === Utilidades ===
 alias dact='deactivate'
-alias matlab="/usr/local/MATLAB/R2018a/bin/matlab -nosoftwareopengl"
+alias matlab='sudo systemd-nspawn -D /var/lib/machines/debian11 \
+  --bind=/usr/local/MATLAB:/usr/local/MATLAB \
+  --bind-ro=/tmp/.X11-unix:/tmp/.X11-unix \
+  --bind=/home/diego:/home/diego \
+  --bind-ro=/etc/passwd \
+  --setenv=DISPLAY=${DISPLAY:-:1} \
+  --setenv=_JAVA_AWT_WM_NONREPARENTING=1 \
+  --as-pid2 /usr/local/MATLAB/R2018a/bin/matlab -softwareopengl'
 
 # === Navegación web ===
 alias portal='brave http://neverssl.com >/dev/null 2>&1 &'

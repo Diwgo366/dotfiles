@@ -1,255 +1,261 @@
 #!/usr/bin/env bash
-# Selector de temas de colores
+# Instalador de tema de colores personalizado para varios programas
 # Ejecuta los scripts individuales de cada tema
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-THEMES_DIR="$SCRIPT_DIR/colors/programs"
+PROGRAMS_DIR="$SCRIPT_DIR/colors"
 
-# Códigos de color
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+export SCRIPT_DIR
 
-# ==============================================================
+# =========================================================
 # FUNCIONES
-# ==============================================================
+# =========================================================
 
+# === Header ===
 show_header() {
-    echo -e "${CYAN}════════════════════════════════════════${NC}"
-    echo -e "${BLUE}   Selector de Temas de Colores${NC}"
-    echo -e "${CYAN}════════════════════════════════════════${NC}"
+    echo "========================================"
+    echo "    Instalador de Tema Personalizado"
+    echo "========================================"
     echo ""
 }
 
+# === Help ===
 show_usage() {
     cat << HELP
-${BLUE}Uso:${NC} $(basename "$0") [OPCIONES]
+Uso: $(basename "$0") [OPCIONES]
 
-${BLUE}Opciones:${NC}
-  --all              Instalar todos los temas disponibles
-  --kitty            Instalar tema Kitty
-  --starship         Instalar tema Starship
-  --nvim             Instalar tema Neovim
-  --gnome            Instalar tema GNOME Terminal
-  --mc               Instalar tema Midnight Commander (requiere sudo)
-  --list             Listar temas disponibles
+OPCIONES:
+  --all              Instalar para todos los programas disponibles
+  --<programa>       Instalar para un programa específico
+  --list             Listar programas disponibles
   -h, --help         Mostrar esta ayuda
-
-${BLUE}Ejemplos:${NC}
-  $(basename "$0") --all
-  $(basename "$0") --kitty --starship --nvim
-  sudo $(basename "$0") --mc
-  $(basename "$0") --list
-
 HELP
 }
 
-# Lista todos los temas disponibles
-list_themes() {
-    echo -e "${YELLOW}Temas disponibles:${NC}"
+# === Finalizar instalación ===
+finish_installation() {
     echo ""
-    
-    for theme_script in "$THEMES_DIR"/*.sh; do
-        if [[ -f "$theme_script" ]]; then
-            theme_name=$(basename "$theme_script" .sh)
-            echo "  • $theme_name"
-        fi
-    done
-    
-    echo ""
+    echo "========================================"
+    echo "        Instalación finalizada"
+    echo "========================================"
 }
 
-# Ejecuta un tema específico
-run_theme() {
-    local theme_name=$1
-    local theme_script="$THEMES_DIR/$theme_name.sh"
+# === Listar programas ===
+list_programs() {
+    local program_name
+    local program_script
+    echo "Programas disponibles:"
+    echo ""
+    for program_script in "$PROGRAMS_DIR"/*.sh; do
+        if [[ -f "$program_script" ]]; then
+            program_name=$(basename "$program_script" .sh)
+            echo "  • $program_name"
+        fi
+    done
+}
+
+# === Ejecuta programa específico ===
+run_program() {
+    local program_name=$1
+    local program_script="$PROGRAMS_DIR/$program_name.sh"
     
-    if [[ ! -f "$theme_script" ]]; then
-        echo -e "${RED}✗ Tema no encontrado: $theme_name${NC}"
+    if [[ ! -f "$program_script" ]]; then
+        echo -e "Programa no encontrado: $program_name"
         return 1
     fi
     
-    if [[ ! -x "$theme_script" ]]; then
-        chmod +x "$theme_script"
+    if [[ ! -x "$program_script" ]]; then
+        chmod +x "$program_script"
     fi
     
-    # MC requiere sudo, pasar al subprocess
-    if [[ "$theme_name" == "mc" ]] && [[ "$EUID" -ne 0 ]]; then
-        sudo bash "$theme_script"
+    if [[ "$EUID" -ne 0 ]] && head -5 "$program_script" | grep -q "# REQUIERE_SUDO"; then
+        sudo "$program_script"
     else
-        bash "$theme_script"
+        "$program_script"
     fi
 }
 
-# Menú interactivo
+# === Menú interactivo ===
 interactive_menu() {
-    show_header
-    
-    declare -a selected
-    declare -a theme_names=()
-    declare -a theme_files=()
-    
-    # Cargar temas disponibles
-    for theme_script in "$THEMES_DIR"/*.sh; do
-        if [[ -f "$theme_script" ]]; then
-            theme_name=$(basename "$theme_script" .sh)
-            theme_names+=("$theme_name")
-            theme_files+=("$theme_script")
+    declare -a selected=()
+    declare -a program_names=()
+    local program_script
+    local program_name program_names
+    local i
+    local idx
+    local program
+    local option
+    local option_num
+    local new_selected
+    local item
+    local error_msg=""
+
+    for program_script in "$PROGRAMS_DIR"/*.sh; do
+        if [[ -f "$program_script" ]]; then
+            program_name=$(basename "$program_script" .sh)
+            program_names+=("$program_name")
         fi
     done
     
     while true; do
-        echo -e "${YELLOW}Selecciona qué temas deseas instalar:${NC}"
+        clear
+        show_header
+
+        if [[ -n "$error_msg" ]]; then
+            echo "$error_msg"
+            echo ""
+            error_msg=""
+        fi
+
+        echo "Selecciona para qué programas instalar:"
         echo ""
         
-        for i in "${!theme_names[@]}"; do
+        for i in "${!program_names[@]}"; do
             idx=$((i + 1))
-            theme="${theme_names[i]}"
-            
-            # Verificar si está seleccionado
-            if [[ " ${selected[@]} " =~ " ${theme} " ]]; then
-                echo -e "  ${GREEN}[✓]${NC} [$idx] $theme"
+            program="${program_names[i]}"
+
+            if [[ " ${selected[@]} " =~ " ${program} " ]]; then
+                echo "  [✓] [$idx] $program"
             else
-                echo "  [ ] [$idx] $theme"
+                echo "  [ ] [$idx] $program"
             fi
         done
         
         echo ""
-        echo -e "  [$((${#theme_names[@]} + 1))] Instalar todos"
+        echo "  [$((${#program_names[@]} + 1))] Instalar todos"
         echo "  [0] Instalar seleccionados"
-        echo "  [Q] Salir sin hacer nada"
+        echo "  [Q] Salir sin instalar"
         echo ""
         
         read -p "Ingresa tu opción: " option
+        echo ""
         
         case "$option" in
             [1-9]*)
                 option_num=$((option))
-                if [[ $option_num -ge 1 && $option_num -le ${#theme_names[@]} ]]; then
+                if [[ $option_num -ge 1 && $option_num -le ${#program_names[@]} ]]; then
                     idx=$((option_num - 1))
-                    theme="${theme_names[idx]}"
-                    
-                    # Toggle
-                    if [[ " ${selected[@]} " =~ " ${theme} " ]]; then
-                        selected=("${selected[@]/${theme}/}")
-                        echo -e "${RED}✗ $theme deseleccionado${NC}"
+                    program="${program_names[idx]}"
+
+                    if [[ " ${selected[@]} " =~ " ${program} " ]]; then
+                        new_selected=()
+                        for item in "${selected[@]}"; do
+                            [[ "$item" != "$program" ]] && new_selected+=("$item")
+                        done
+                        selected=("${new_selected[@]}")
                     else
-                        selected+=("$theme")
-                        echo -e "${GREEN}✓ $theme seleccionado${NC}"
+                        selected+=("$program")
                     fi
-                elif [[ $option_num -eq $((${#theme_names[@]} + 1)) ]]; then
-                    # Instalar todos
+
+                elif [[ $option_num -eq $((${#program_names[@]} + 1)) ]]; then
+                    echo "========================================"
                     echo ""
-                    echo -e "${YELLOW}Instalando todos los temas...${NC}"
+                    echo " Instalando todos los programas..."
                     echo ""
-                    for theme in "${theme_names[@]}"; do
-                        run_theme "$theme" || echo -e "${RED}✗ Error al instalar $theme${NC}"
+                    for program in "${program_names[@]}"; do
+                        run_program "$program" || echo "Error al instalar $program"
                     done
-                    echo ""
-                    echo -e "${GREEN}✓ ¡Completado!${NC}"
+                    finish_installation
                     exit 0
                 else
-                    echo -e "${RED}Opción inválida.${NC}"
+                    error_msg="Opción inválida: $option"
                 fi
                 ;;
             0)
                 if [[ ${#selected[@]} -eq 0 ]]; then
-                    echo -e "${RED}✗ No hay temas seleccionados${NC}"
+                    error_msg="No hay programas seleccionados"
                 else
+                    echo "========================================"
                     echo ""
-                    echo -e "${YELLOW}Instalando temas seleccionados...${NC}"
+                    echo " Instalando programas seleccionados..."
                     echo ""
-                    for theme in "${selected[@]}"; do
-                        run_theme "$theme" || echo -e "${RED}✗ Error al instalar $theme${NC}"
+                    for program in "${selected[@]}"; do
+                        run_program "$program" || echo "Error al instalar $program"
                     done
-                    echo ""
-                    echo -e "${GREEN}✓ ¡Completado!${NC}"
+                    finish_installation
                     exit 0
                 fi
                 ;;
             Q|q)
-                echo -e "${YELLOW}Cancelado.${NC}"
+                echo "========================================"
+                echo "         Instalación cancelada"
+                echo "========================================"
                 exit 0
                 ;;
             *)
-                echo -e "${RED}Opción inválida.${NC}"
+                error_msg="Opción inválida: $option"
                 ;;
         esac
-        
-        echo ""
     done
 }
 
-# ==============================================================
+# =========================================================
 # MAIN
-# ==============================================================
+# =========================================================
 
 main() {
+    local programs_to_install=()
+    local install_all=0
+    local arg
+    local program_name
+    local program_script
+    local program
+    
     if [[ $# -eq 0 ]]; then
         interactive_menu
         return
     fi
-    
-    local themes_to_install=()
-    local install_all=0
-    
-    # Parsear argumentos
+
     for arg in "$@"; do
         case "$arg" in
             --all)
                 install_all=1
                 ;;
             --list)
-                list_themes
+                list_programs
                 exit 0
                 ;;
             -h|--help)
                 show_usage
                 exit 0
                 ;;
-            --kitty|--starship|--nvim|--gnome|--mc)
-                theme_name=${arg#--}
-                themes_to_install+=("$theme_name")
+            --*)
+                program_name=${arg#--}
+                programs_to_install+=("$program_name")
                 ;;
             *)
-                echo -e "${RED}Error: Opción desconocida: $arg${NC}"
+                echo "Error: Opción desconocida: $arg"
                 show_usage
                 exit 1
                 ;;
         esac
     done
-    
-    # Si --all, obtener todos los temas
+
     if [[ $install_all -eq 1 ]]; then
-        for theme_script in "$THEMES_DIR"/*.sh; do
-            if [[ -f "$theme_script" ]]; then
-                theme_name=$(basename "$theme_script" .sh)
-                themes_to_install+=("$theme_name")
+        for program_script in "$PROGRAMS_DIR"/*.sh; do
+            if [[ -f "$program_script" ]]; then
+                program_name=$(basename "$program_script" .sh)
+                programs_to_install+=("$program_name")
             fi
         done
     fi
     
-    # Instalar temas
-    if [[ ${#themes_to_install[@]} -eq 0 ]]; then
-        echo -e "${RED}Error: No hay temas para instalar${NC}"
+    if [[ ${#programs_to_install[@]} -eq 0 ]]; then
+        echo "No hay programas para instalar"
         show_usage
         exit 1
     fi
-    
-    echo -e "${YELLOW}Instalando temas...${NC}"
+    echo ""
+    echo "Instalando programas..."
     echo ""
     
-    for theme in "${themes_to_install[@]}"; do
-        run_theme "$theme" || echo -e "${RED}✗ Error al instalar $theme${NC}"
+    for program in "${programs_to_install[@]}"; do
+        run_program "$program" || echo "Error al instalar $program"
     done
-    
     echo ""
-    echo -e "${GREEN}✓ ¡Completado!${NC}"
+    echo "Instalación finalizada"
 }
 
 main "$@"

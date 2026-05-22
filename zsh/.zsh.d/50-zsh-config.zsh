@@ -32,7 +32,7 @@ setopt CORRECT                  # Spell correction for commands
 # setopt CORRECT_ALL            # Spell correction for all arguments (descomenta si lo necesitas)
 
 # ==============================================================
-# COLORES PARA LS (Dracula Theme)
+# COLORES PARA LS
 # ==============================================================
 # Habilitar colores en ls
 export CLICOLOR=1
@@ -40,4 +40,7 @@ export CLICOLOR_FORCE=1
 
 # Cargar esquema de colores para ls (diferencia archivos, carpetas, etc.)
 [[ -z "$LS_COLORS" ]] && command -v dircolors &>/dev/null && eval "$(dircolors -b)"
+
+# Reconocer correctamente supr
+bindkey "^[[3~" delete-char
 

@@ -24,7 +24,7 @@ if [[ -d "$HOME/.zsh.d" ]]; then
 fi
 
 # Inicializar Starship prompt
-eval "$(~/.local/bin/starship init zsh)"
+eval "$(starship init zsh)"
 
 # ===============================================================
 # MENSAJE DE BIENVENIDA
@@ -32,42 +32,107 @@ eval "$(~/.local/bin/starship init zsh)"
 
 # Mostrar mensaje solo en shells interactivos
 if [[ $- == *i* ]]; then
-    WIDTH=$(( COLUMNS - 2 ))
 
-    _center() {
-        local text="$1"
-        local chars=$#text wide=0 i char
-        for ((i=1; i<=chars; i++)); do
-            char=$text[i]
-            (( $(( #char )) > 0xFFFF )) && wide=$(( wide + 1 ))
-        done
-        local visual=$(( chars + wide ))
-        local left=$(( (WIDTH - visual) / 2 ))
-        local right=$(( WIDTH - visual - left ))
-        (( left < 0 )) && left=0
-        (( right < 0 )) && right=0
-        printf "%*s%s%*s" "$left" "" "$text" "$right" ""
-    }
+	command -v python3 >/dev/null 2>&1 || return
+
+    _visual_width() {
+	python3 - "$1" << 'EOF'
+import re, sys, wcwidth
+
+s = sys.argv[1]
+s = re.sub(r'\x1b\[[0-9;]*m', '', s)
+
+print(sum(wcwidth.wcwidth(c) for c in s))
+EOF
+	}
 
     _show_welcome() {
-        local hour=$(date +%H) greeting icon
+ 
+		local hour=$(date +%H)
+		local grt_msg grt_ico grt_cl
+
         if (( hour < 7 )); then
-            greeting="Buenas noches"; icon="🌙"
+            grt_msg="Buenas noches"
+			grt_ico=$'\uf186'
+			grt_cl=$CL_MORADO
+
         elif (( hour < 12 )); then
-            greeting="Buenos días"; icon="🌅"
+            grt_msg="Buenos días"
+			grt_ico=$'\ue342'
+			grt_cl=$CL_NARANJA
+
         elif (( hour < 18 )); then
-            greeting="Buenas tardes"; icon="☀️"
+            grt_msg="Buenas tardes"
+			grt_ico=$'\uf185'
+			grt_cl=$CL_AMARILLO
+
         else
-            greeting="Buenas noches"; icon="🌙"
+            grt_msg="Buenas noches"
+			grt_ico=$'\uf186'
+			grt_cl=$CL_MORADO
         fi
-        local border="╔$(printf '═%.0s' $(seq 1 $WIDTH))╗"
-        echo "$border"
-        echo "║$(_center "$icon $greeting, $(whoami)")║"
-        echo "║$(_center "Sistema: $(uname -s) ║ Terminal: zsh")║"
-        echo "╚${border:1:$WIDTH}╝"
+
+		local os_nm=$(uname -s)
+        local os_ico
+        
+		case "$os_nm" in
+            Linux)
+				os_ico=$'\uf17c'
+				;;
+            Darwin)
+				os_nm="masOS"
+				os_ico=$'\uf179'
+				;;
+            FreeBSD)
+				os_nm="FreeBSD"
+				os_ico=$'\uf17c'
+				;;
+            CYGWIN*|MINGW*|MSYS*)
+				os_nm="Windows"
+				os_ico=$'\uf17a'
+				;;
+            *)
+				os_nm="Unknown"
+				os_ico="?"
+				;;
+        esac
+
+		if [[ "$os_nm" == "Linux" ]]; then
+			if [[ -f /etc/os-release ]]; then
+				. /etc/os-release
+				os_nm="$NAME"
+			fi
+		fi
+
+		if [[ -n "$SSH_CONNECTION" ]]; then
+			con_cl=$CL_ROJO
+			con_ico=$'\uf489'
+		else
+			con_ico=$'\uf109'
+			con_cl=$CL_CYAN
+		fi
+
+		local line1="${grt_cl}${grt_ico} ${grt_msg}${reset}, $CL_VERDE$(whoami)$CL_RESET"
+		local line2="Bienvenido a ${con_cl}${con_ico}  $(hostname)$CL_RESET | $CL_RESET${os_ico} ${os_nm}$CL_RESET"
+
+		local w=${COLUMNS:-$(tput cols)}
+		local v1=$(_visual_width "$line1")
+        local v2=$(_visual_width "$line2")
+        
+		local l1=$(( (w - v1) / 2 ))
+		local l2=$(( (w - v2) / 2 ))
+
+		if (( l1 < 0 || l2 < 0 )); then
+			return 0
+		fi
+		
+		printf '%*s\n' "$w" '' | tr ' ' '='
+		printf "%*s%s%*s\n" "$l1" "" "$line1"
+        printf "%*s%s%*s\n" "$l2" "" "$line2"
+        printf '%*s\n' "$w" '' | tr ' ' '='
     }
 
     _show_welcome
-    unset -f _show_welcome _center
-    unset WIDTH
+    unset -f _show_welcome _visual_width
 fi
+

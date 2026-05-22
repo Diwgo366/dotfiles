@@ -3,22 +3,24 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-COLORS_JSON="$DOTFILES_DIR/colors/colors.json"
+DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+COLORS_JSON="$SCRIPT_DIR/colors/colors.json"
 
-# ==============================================================
-# VALIDACIÓN Y EXTRACCIÓN
-# ==============================================================
+export DOTFILES_DIR
+export COLORS_JSON
+
+# =========================================================
+# FUNCIONES
+# =========================================================
 
 validate_colors_json() {
     if [[ ! -f "$COLORS_JSON" ]]; then
-        echo "Error: $COLORS_JSON not found"
+        echo "No se encontró: $COLORS_JSON"
         exit 1
     fi
 }
 
-# Extrae los colores del JSON y los exporta como variables
+# === Extraer colores del JSON ===
 extract_colors() {
     export COLORS_JSON
     eval "$(python3 << PYEOF
@@ -31,7 +33,7 @@ out = []
 for key, val in data.get('structural', {}).items():
     out.append(f'{key.upper()}={val!r}')
 
-for key, val in data.get('ansi', {}).items():
+for key, val in data.get('palette', {}).items():
     out.append(f'{key.upper()}={val!r}')
 
 print('; '.join(out))
@@ -39,7 +41,7 @@ PYEOF
     )"
 }
 
-# Obtiene el nombre de la paleta desde el JSON
+# === Extraer nombre de la paleta ===
 get_palette_name() {
     python3 << EOF
 import json, os
@@ -52,5 +54,3 @@ EOF
 export -f validate_colors_json
 export -f extract_colors
 export -f get_palette_name
-export DOTFILES_DIR
-export COLORS_JSON

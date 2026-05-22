@@ -1,0 +1,15 @@
+[config]
+no_actions=true
+normal_window=true
+hide_scroll=true
+allow_markup=true
+allow_images=true
+image_size=28
+term=kitty
+prompt=Buscar...
+show=drun
+width=40%
+height=40%
+location=center
+gtk_dark=true
+insensitive=true

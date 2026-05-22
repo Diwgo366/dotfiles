@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
+# Instalador de fuente Caskaydia Mono Nerd Font
+# Descarga, instala y actualiza la caché de fuentes
 
-# ==============================================================
-# INSTALACIÓN DE CASKAYDIA MONO NERD FONT
-# ==============================================================
-
-FONT_NAME="CaskaydiaMono"
+FONT_NAME="CascadiaMono"
 FONT_DIR="$HOME/.local/share/fonts"
 
 mkdir -p "$FONT_DIR"
@@ -14,7 +12,7 @@ cd /tmp || exit
 echo "Descargando fuente..."
 
 wget -O "${FONT_NAME}.zip" \
-https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip
+https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/CascadiaMono.zip
 
 echo "Extrayendo..."
 

@@ -1,7 +1,5 @@
 # ====================================================================
 # CONFIGURACIÓN DE STARSHIP - Terminal prompt
-# ====================================================================
-# Tema: Dracula con CaskayDiamono Nerd Font
 # Layout: 2 líneas (Hora + Contexto en L1, Entrada en L2)
 # ====================================================================
 
@@ -123,32 +121,33 @@ format = "[ $duration]($style) "
 [status]
 style = "bold red"
 success_style = "bold green"
-symbol = "✕ "
+symbol = " "
 success_symbol = "✓ "
 format = " [$symbol]($style)"
-map_symbol = true
+map_symbol = false
 disabled = false
 pipestatus = true
 
+# =========================================================
+# Colores generados automaticamente
+# =========================================================
 
-# ==============================================================
-# Colores generados por colors/themes/starship.sh
-# ==============================================================
-# ==============================================================
-# Colores generados por colors/themes/starship.sh
-# ==============================================================
-# ==============================================================
-# Colores generados por colors/themes/starship.sh
-# ==============================================================
+# =========================================================
+# Colores generados automaticamente
+# =========================================================
+
+# =========================================================
+# Colores generados automaticamente
+# =========================================================
 [palettes.custom_dotfiles]
-purple = "#BD93F9"
-pink = "#ff79c6"
-orange = "#FFB86C"
-cyan = "#8BE9FD"
-green = "#50FA7B"
-red = "#FF5555"
+purple = "#9B6BDF"
+pink   = "#ff79c6"
+orange = "#EFA554"
+cyan   = "#8BE9FD"
+green  = "#42E66C"
+red    = "#E64747"
 yellow = "#F1FA8C"
-blue = "#75D7EC"
+blue   = "#75D7EC"
 magenta = "#E356A7"
-white = "#f8f8f2"
-black = "#262626"
+white  = "#f8f8f2"
+black  = "#262626"

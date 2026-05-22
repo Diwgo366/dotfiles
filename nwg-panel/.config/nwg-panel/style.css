@@ -1,0 +1,111 @@
+* {
+    font-family: CaskaydiaMono Nerd Font, sans-serif;
+    font-size: 13px;
+}
+
+*:focus {
+    outline: none;
+}
+
+button:focus {
+    outline: none;
+    border: none;
+}
+
+button {
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    margin: 2px;
+    outline: none;
+}
+
+button:hover {
+    background: rgba(83, 148, 209, 0.4);
+    box-shadow: none;
+    text-shadow: none;
+}
+
+#panel-top {
+    background-color: rgba(13, 49, 90, 0.85);
+    color: #f8f8f2;
+}
+
+#task-box {
+    padding-left: 6px;
+    padding-right: 6px;
+    color: #6a8fb1;
+}
+
+#task-box-focused {
+    background-color: #5394d1;
+    color: #f8f8f2;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+#task-box:hover {
+    background: rgba(83, 148, 209, 0.4);
+}
+
+#hyprland-workspaces {
+    padding: 0 4px;
+}
+
+#hyprland-workspaces-item {
+    padding: 0 2px;
+}
+
+#workspace-occupied {
+    color: #d4e6f5;
+}
+
+#button-custom {
+    background: transparent;
+    border: 0;
+    color: #5394d1;
+}
+
+#clock {
+    font-family: CaskaydiaMono Nerd Font, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #f8f8f2;
+}
+
+#controls-window {
+    border-radius: 0;
+    background-color: rgba(13, 49, 90, 0.95);
+    color: #f8f8f2;
+}
+
+#controls-window scale value {
+    color: #f8f8f2;
+}
+
+#brightness-popup {
+    border-radius: 0;
+    background-color: rgba(13, 49, 90, 0.95);
+    color: #f8f8f2;
+}
+
+#brightness-popup box {
+    padding: 15px;
+}
+
+#executor-label {
+    font-family: CaskaydiaMono Nerd Font, sans-serif;
+    padding: 0 6px;
+    color: #d4e6f5;
+}
+
+#executor-numlock {
+    font-family: CaskaydiaMono Nerd Font, sans-serif;
+    padding: 0 6px;
+    color: #50fa7b;
+    font-weight: bold;
+}
+
+#weather {
+    font-size: 13px;
+}
