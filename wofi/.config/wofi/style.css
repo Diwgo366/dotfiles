@@ -37,7 +37,7 @@ window {
 
 #input:focus {
     border: none;
-    background-color: alpha(--wofi-color1, 0.7);
+    background-color: alpha(--wofi-color1, 0.8);
     color: --wofi-color2;
 }
 
@@ -67,7 +67,7 @@ window {
 
 #entry:selected {
     border: none;
-    background-color: alpha(--wofi-color1, 0.7);
+    background-color: alpha(--wofi-color1, 0.8);
     color: --wofi-color2;
     box-shadow: inset 0 0 0 2px alpha(--wofi-color2, 0.8);
 }

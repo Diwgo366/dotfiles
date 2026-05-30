@@ -54,22 +54,22 @@ EOF
         if (( hour < 7 )); then
             grt_msg="Buenas noches"
 			grt_ico=$'\uf186'
-			grt_cl=$CL_MORADO
+			grt_cl=$CL_MORADO_BRIGHT
 
         elif (( hour < 12 )); then
-            grt_msg="Buenos días"
+            grt_msg=" Buenos días"
 			grt_ico=$'\ue342'
-			grt_cl=$CL_NARANJA
+			grt_cl=$CL_AMARILLO_BRIGHT
 
         elif (( hour < 18 )); then
             grt_msg="Buenas tardes"
 			grt_ico=$'\uf185'
-			grt_cl=$CL_AMARILLO
+			grt_cl=$CL_AMARILLO_BRIGHT
 
         else
             grt_msg="Buenas noches"
 			grt_ico=$'\uf186'
-			grt_cl=$CL_MORADO
+			grt_cl=$CL_MORADO_BRIGHT
         fi
 
 		local os_nm=$(uname -s)
@@ -105,14 +105,14 @@ EOF
 		fi
 
 		if [[ -n "$SSH_CONNECTION" ]]; then
-			con_cl=$CL_ROJO
+			con_cl=$CL_ROJO_BRIGHT
 			con_ico=$'\uf489'
 		else
 			con_ico=$'\uf109'
-			con_cl=$CL_CYAN
+			con_cl=$CL_CYAN_BRIGHT
 		fi
 
-		local line1="${grt_cl}${grt_ico} ${grt_msg}${reset}, $CL_VERDE$(whoami)$CL_RESET"
+		local line1="${grt_cl}${grt_ico} ${grt_msg}${reset}, $CL_VERDE_BRIGHT$(whoami)$CL_RESET"
 		local line2="Bienvenido a ${con_cl}${con_ico}  $(hostname)$CL_RESET | $CL_RESET${os_ico} ${os_nm}$CL_RESET"
 
 		local w=${COLUMNS:-$(tput cols)}
@@ -136,3 +136,5 @@ EOF
     unset -f _show_welcome _visual_width
 fi
 
+
+export PATH=$PATH:/home/diego/.spicetify

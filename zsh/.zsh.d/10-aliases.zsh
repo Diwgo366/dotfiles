@@ -9,9 +9,6 @@ alias icat='kitten icat'
 alias ..='cd ..'
 alias ...='cd ../..'
 
-# === Funcionalidades ===
-alias rm='rm -i'
-
 # === Listados ===
 alias ls='eza --icons'
 alias ll='eza -alh --icons --group-directories-first'

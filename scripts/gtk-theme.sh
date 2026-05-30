@@ -7,7 +7,7 @@ set -e
 echo "Aplicando configuración GTK..."
 
 # Tema
-gsettings set org.gnome.desktop.interface gtk-theme 'mi-tema-gtk'
+gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-BL-LB-Dark' #Adwaita
 echo "✓ Tema: mi-tema-gtk"
 
 # Iconos
