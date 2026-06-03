@@ -12,3 +12,4 @@ gzip
 tar
 eza
 starship
+ethtool
