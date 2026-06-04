@@ -1,0 +1,7 @@
+scripts
+\.git
+\.cache
+\.zshrc
+\.zsh\.d
+\.stow-local-ignore
+
