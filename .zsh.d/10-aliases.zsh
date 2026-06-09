@@ -18,8 +18,9 @@ alias lsd='eza -D --icons'
 
 # === Utilidades ===
 alias dact='deactivate'
-alias matlab='sudo systemd-nspawn -D /var/lib/machines/debian11 \
-  --bind=/usr/local/MATLAB:/usr/local/MATLAB \
+
+alias matlab='xhost +SI:localuser:root >/dev/null 2>&1; sudo systemd-nspawn -D /var/lib/machines/debian11 \
+  --bind=/home/diego/MATLAB:/usr/local/MATLAB \
   --bind-ro=/tmp/.X11-unix:/tmp/.X11-unix \
   --bind=/home/diego:/home/diego \
   --bind-ro=/etc/passwd \

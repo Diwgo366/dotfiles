@@ -138,3 +138,4 @@ fi
 
 
 export PATH=$PATH:/home/diego/.spicetify
+export PATH="$HOME/.local/bin:$PATH"
