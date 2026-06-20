@@ -11,44 +11,46 @@
 
 window { 
     text-shadow:none;
-    background-color:--wofi-color0;
-    box-shadow:none;
+    background-color: #282a36;
+    border: 0;
+    border-radius: 10px;
 }
 
 #input {
-    margin: 5px;
-    border: none;
-    padding: 6px;
-    border-radius: 15px;
-    box-shadow: inset 0 0 0 2px alpha(--wofi-color2, 0.8);
-    color: --wofi-color5;
+    margin: 25px;
+	margin-bottom: 0px;
+    border: 2px solid #7a7a7a;
+    padding: 5px;
+    border-radius: 10px;
+    background-color: #282a36;
+    color: #7a7a7a;
 }
 
 #input image {
     border: none;
-    padding:6px;
+    padding: 6px;
     padding-right: 15px;
-    color: --wofi-color5;
+    color: #7a7a7a;
 }
 
-#input image:focus {
-    color: --wofi-color2;
+#input:focus image {
+    color: #f8f8f2;
 }
 
 #input:focus {
-    border: none;
-    background-color: alpha(--wofi-color1, 0.8);
-    color: --wofi-color2;
+    border: 2px solid #f8f8f2;
+	background-color: alpha(#262626, 0.5);
+    color: #f8f8f2;
+	box-shadow: none;
 }
 
 #inner-box {
-    margin-top: 5px;
-    margin-bottom: 5px;
+    padding: 20px;
+	padding-top: 10px;
 }
 
-#outer-box {    
-    border: none;
-    padding: 20px;
+#outer-box {
+    padding: 0px;
 }
 
 #text {
@@ -57,17 +59,19 @@ window {
 }
 
 #entry {
-    border: none;
+    border: 2px solid transparent;
     margin: 5px;
     padding: 8px;
-    border-radius: 15px;
+    border-radius: 10px;
     transition: all 0.2s ease-in-out;
-    color: --wofi-color5;
+    color: #f8f8f2;
+    background-color: transparent;
 }
 
 #entry:selected {
-    border: none;
-    background-color: alpha(--wofi-color1, 0.8);
-    color: --wofi-color2;
-    box-shadow: inset 0 0 0 2px alpha(--wofi-color2, 0.8);
+    border: 2px solid #f8f8f2;
+	background-color: alpha(#262626, 0.5);
+    color: #f8f8f2;
+	box-shadow: inset 0 0 10px 0px alpha(#262626,1) ;
 }
+
