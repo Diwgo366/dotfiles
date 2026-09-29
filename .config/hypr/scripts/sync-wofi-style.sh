@@ -20,7 +20,7 @@ cat > "$WOFI_CSS" <<EOF
 * {
     font-family: CaskaydiaMono Nerd Font, monospace;
     padding: 0px;
-    margin: 0px;
+	margin: 0px;
     font-size: 16px;
     border: none;
     outline: none;
@@ -32,14 +32,16 @@ window {
     text-shadow:none;
     background-color: ${BG_COLOR};
     border: 0;
+	padding: 10px;
     border-radius: ${ROUNDING}px;
 }
 
 #input {
-    margin: 25px;
-	margin-bottom: 0px;
+    margin: 5px;
+	margin-top: 20px;
+	margin-bottom: 20px;
     border: ${BORDER_SIZE}px solid ${INACTIVE_HEX};
-    padding: 5px;
+    padding: 0px;
     border-radius: ${ROUNDING}px;
     background-color: ${BG_COLOR};
     color: ${INACTIVE_HEX};
@@ -47,7 +49,7 @@ window {
 
 #input image {
     border: none;
-    padding: 6px;
+    padding: 10px;
     padding-right: 15px;
     color: ${INACTIVE_HEX};
 }
@@ -64,18 +66,20 @@ window {
 }
 
 #inner-box {
-    padding: 20px;
-	padding-top: 10px;
+    padding: 0px;
 }
 
 #outer-box {
-    padding: 0px;
+    padding: 20px;
+	padding-top: 10px;
 }
 
 #text {
     padding-left: 10px;
     padding-right: 10px;
 }
+
+
 
 #entry {
     border: ${BORDER_SIZE}px solid transparent;
@@ -86,6 +90,12 @@ window {
     color: ${ACTIVE_HEX};
     background-color: transparent;
 }
+
+#scroll {
+    min-width: 0;
+}
+
+
 
 #entry:selected {
     border: ${BORDER_SIZE}px solid ${ACTIVE_HEX};

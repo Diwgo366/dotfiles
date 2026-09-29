@@ -8,18 +8,15 @@ if pgrep -x wofi >/dev/null; then
 fi
 
 TARGET_WS=$(hyprctl activeworkspace -j | jq -r '.id')
-SNAPSHOT=$(hyprctl clients -j | jq -c '[.[].address]')
+ADDRS_BEFORE=$(hyprctl clients -j | jq -r '.[].address' | sort)
 
-wofi --show drun
+wofi --show drun --width 600
 
-# Mover cualquier ventana nueva al workspace original
-for i in $(seq 1 200); do
-    sleep 0.01
-    NEW=$(hyprctl clients -j | jq -r --argjson snap "$SNAPSHOT" '
-        [.[] | select(.address as $a | ($snap | index($a)) | not) | select(.mapped == true)] | .[0].address // ""
-    ')
-    if [[ -n "$NEW" ]]; then
-        hyprctl eval "hl.dsp.window.move({ workspace = $TARGET_WS, address = \"$NEW\", follow = false })"
-        break
-    fi
+for i in $(seq 1 60); do
+  sleep 0.05
+  NEW_ADDR=$(comm -13 <(echo "$ADDRS_BEFORE") <(hyprctl clients -j | jq -r '.[].address' | sort) | head -1)
+  if [[ -n "$NEW_ADDR" ]]; then
+    hyprctl dispatch "hl.dsp.window.move({workspace = $TARGET_WS, address = \"$NEW_ADDR\", follow = false})"
+    break
+  fi
 done

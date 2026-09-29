@@ -42,12 +42,13 @@ hl.window_rule({
 
 -- Variables
 local mainMod = "SUPER"
-local terminal = "/home/diego/.local/bin/ws-run kitty"
-local fileManager = "/home/diego/.local/bin/ws-run thunar"
+local terminal = "kitty"
+local fileManager = "thunar"
 local menu = "~/.config/hypr/scripts/wofi.sh"
 local clipboard = "~/.config/hypr/scripts/cliphist.sh"
 
 -- Program binds
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("/home/diego/.local/bin/spt-save"))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
@@ -83,10 +84,10 @@ hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
 hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
 
 -- Resize windows
-hl.bind(mainMod .. " + ALT + left", hl.dsp.window.resize({ x = -40, y = 0 }))
-hl.bind(mainMod .. " + ALT + right", hl.dsp.window.resize({ x = 40, y = 0 }))
-hl.bind(mainMod .. " + ALT + up", hl.dsp.window.resize({ x = 0, y = -40 }))
-hl.bind(mainMod .. " + ALT + down", hl.dsp.window.resize({ x = 0, y = 40 }))
+hl.bind(mainMod .. " + ALT + left", hl.dsp.window.resize({ x = -40, y = 0, relative = true }), { repeating = true })
+hl.bind(mainMod .. " + ALT + right", hl.dsp.window.resize({ x = 40, y = 0, relative = true }), { repeating = true })
+hl.bind(mainMod .. " + ALT + up", hl.dsp.window.resize({ x = 0, y = -40, relative = true }), { repeating = true })
+hl.bind(mainMod .. " + ALT + down", hl.dsp.window.resize({ x = 0, y = 40, relative = true }), { repeating = true })
 
 -- Media keys
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("~/.config/hypr/scripts/volume.sh up"), { repeating = true, locked = true })

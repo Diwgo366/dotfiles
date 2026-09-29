@@ -1,7 +1,7 @@
 * {
     font-family: CaskaydiaMono Nerd Font, monospace;
     padding: 0px;
-    margin: 0px;
+	margin: 0px;
     font-size: 16px;
     border: none;
     outline: none;
@@ -13,14 +13,16 @@ window {
     text-shadow:none;
     background-color: #282a36;
     border: 0;
+	padding: 10px;
     border-radius: 10px;
 }
 
 #input {
-    margin: 25px;
-	margin-bottom: 0px;
+    margin: 5px;
+	margin-top: 20px;
+	margin-bottom: 20px;
     border: 2px solid #7a7a7a;
-    padding: 5px;
+    padding: 0px;
     border-radius: 10px;
     background-color: #282a36;
     color: #7a7a7a;
@@ -28,7 +30,7 @@ window {
 
 #input image {
     border: none;
-    padding: 6px;
+    padding: 10px;
     padding-right: 15px;
     color: #7a7a7a;
 }
@@ -45,18 +47,20 @@ window {
 }
 
 #inner-box {
-    padding: 20px;
-	padding-top: 10px;
+    padding: 0px;
 }
 
 #outer-box {
-    padding: 0px;
+    padding: 20px;
+	padding-top: 10px;
 }
 
 #text {
     padding-left: 10px;
     padding-right: 10px;
 }
+
+
 
 #entry {
     border: 2px solid transparent;
@@ -67,6 +71,12 @@ window {
     color: #f8f8f2;
     background-color: transparent;
 }
+
+#scroll {
+    min-width: 0;
+}
+
+
 
 #entry:selected {
     border: 2px solid #f8f8f2;

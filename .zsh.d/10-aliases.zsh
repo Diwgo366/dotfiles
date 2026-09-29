@@ -29,7 +29,7 @@ alias matlab='xhost +SI:localuser:root >/dev/null 2>&1; sudo systemd-nspawn -D /
   --as-pid2 /usr/local/MATLAB/R2018a/bin/matlab -softwareopengl'
 
 # === Navegación web ===
-alias portal='brave http://neverssl.com >/dev/null 2>&1 &'
+alias portal='xdg-open http://neverssl.com >/dev/null 2>&1 &'
 
 # === Git (complementarios) ===
 alias gst='git status'
@@ -40,3 +40,10 @@ alias gp='git push'
 alias gl='git log --oneline'
 
 alias kmusic='kitty --session ~/.config/kitty/sessions/music.conf'
+
+# === Spotify ===
+# spt - TUI de Spotify (definido en spt.sh)
+# spt-save - guarda canción actual en playlist (atajo global)
+# Configura: export SPT_SAVE_PLAYLIST='spotify:playlist:xxx'
+# WOL - Encender workstation desde casa con monitoreo
+alias send_wol='ssh diego@raspberrypi ~/scripts/wol_monitor.sh'
