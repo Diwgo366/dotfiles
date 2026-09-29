@@ -28,7 +28,10 @@ Uso: $(basename "$0") [OPCIONES]
 
 OPCIONES:
   --all              Instalar para todos los programas disponibles
-  --<programa>       Instalar para un programa específico
+  --generate-all     Generar TODO (Hyprland, GTK, apps, etc.) y recargar
+  --hyprland         Generar solo hyprland-gui.lua y recargar
+  --gtk              Aplicar solo tema GTK (gsettings)
+  --<programa>       Instalar para un programa específico (kitty, nvim, starship, wofi, zsh)
   --list             Listar programas disponibles
   -h, --help         Mostrar esta ayuda
 HELP
@@ -195,9 +198,79 @@ interactive_menu() {
 # MAIN
 # =========================================================
 
+# === Generar Hyprland ===
+generate_hyprland() {
+    echo "Generando hyprland-gui.lua..."
+    python3 "$SCRIPT_DIR/colors/generate-hyprland.py" "$SCRIPT_DIR/colors/colors-universal.json" "$HOME/Dotfiles/.config/hypr/hyprland-gui.lua"
+    echo "Recargando Hyprland..."
+    hyprctl reload
+    echo "✓ Hyprland actualizado"
+}
+
+# === Generar GTK ===
+generate_gtk() {
+    echo "Aplicando tema GTK..."
+    "$SCRIPT_DIR/gtk-theme.sh"
+    echo "✓ GTK actualizado"
+}
+
+# === Generar TODO ===
+generate_all() {
+    echo "========================================"
+    echo "    Generando TODA la configuración"
+    echo "========================================"
+    echo ""
+    
+    generate_hyprland
+    echo ""
+    generate_gtk
+    echo ""
+    
+    # Generar tema AGS
+    echo "Generando tema AGS..."
+    python3 "$SCRIPT_DIR/colors/generate-ags-theme.py" "$SCRIPT_DIR/colors/colors-universal.json" "$HOME/Proyectos/ags/themes/base.js"
+    echo "✓ Tema AGS generado"
+    echo ""
+    
+    # Ejecutar scripts de apps existentes
+    for program_script in "$PROGRAMS_DIR"/*.sh; do
+        if [[ -f "$program_script" ]]; then
+            program_name=$(basename "$program_script" .sh)
+            # Solo los scripts de apps conocidos
+            case "$program_name" in
+                kitty|nvim|starship|wofi|zsh)
+                    echo "Instalando $program_name..."
+                    run_program "$program_name" || echo "Error al instalar $program_name"
+                    ;;
+            esac
+        fi
+    done
+    
+    # Recargar AGS si está corriendo
+    if pgrep -f "ags run" > /dev/null; then
+        echo "Recargando AGS..."
+        pkill -f "ags run"
+        sleep 1
+        ags run "$HOME/Proyectos/ags/proyecto.js" &
+        echo "✓ AGS recargado"
+    fi
+    
+    echo ""
+    echo "========================================"
+    echo "    Generación completa finalizada"
+    echo "========================================"
+}
+
+# =========================================================
+# MAIN
+# =========================================================
+
 main() {
     local programs_to_install=()
     local install_all=0
+    local generate_all_flag=0
+    local generate_hyprland_flag=0
+    local generate_gtk_flag=0
     local arg
     local program_name
     local program_script
@@ -212,6 +285,15 @@ main() {
         case "$arg" in
             --all)
                 install_all=1
+                ;;
+            --generate-all)
+                generate_all_flag=1
+                ;;
+            --hyprland)
+                generate_hyprland_flag=1
+                ;;
+            --gtk)
+                generate_gtk_flag=1
                 ;;
             --list)
                 list_programs
@@ -232,6 +314,21 @@ main() {
                 ;;
         esac
     done
+
+    if [[ $generate_all_flag -eq 1 ]]; then
+        generate_all
+        exit 0
+    fi
+    
+    if [[ $generate_hyprland_flag -eq 1 ]]; then
+        generate_hyprland
+        exit 0
+    fi
+    
+    if [[ $generate_gtk_flag -eq 1 ]]; then
+        generate_gtk
+        exit 0
+    fi
 
     if [[ $install_all -eq 1 ]]; then
         for program_script in "$PROGRAMS_DIR"/*.sh; do
