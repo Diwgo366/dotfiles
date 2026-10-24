@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Universal Theme Color Schema",
+  "description": "Single source of truth for all theming across the desktop session",
+  "version": "1.0.0",
+
+  "metadata": {
+    "name": "kanagawa",
+    "description": "Kanagawa Theme",
+    "author": "diego",
+    "variant": "dark"
+  },
+
+  "base": {
+    "bg": "#1f1f28",
+    "bg_alt": "#181616",
+    "bg_elevated": "#2a2a37",
+    "bg_overlay": "#363646",
+    "fg": "#dcd7ba",
+    "fg_muted": "#a89984",
+    "fg_subtle": "#727169",
+    "border": "#2a2a37",
+    "border_focus": "#7e9cd8",
+    "border_subtle": "#1f1f28"
+  },
+
+  "palette": {
+    "black": "#1f1f28",
+    "red": "#c34043",
+    "green": "#76946a",
+    "yellow": "#c0a36e",
+    "blue": "#7e9cd8",
+    "magenta": "#957fb8",
+    "cyan": "#6a9589",
+    "orange": "#ffa066",
+    "bright_black": "#54546d",
+    "bright_red": "#e82424",
+    "bright_green": "#98bb6c",
+    "bright_yellow": "#e6c384",
+    "bright_blue": "#7fb4ca",
+    "bright_magenta": "#938aa9",
+    "bright_cyan": "#7aa89f",
+    "bright_white": "#dcd7ba"
+  },
+
+  "semantic": {
+    "primary": { "main": "#7e9cd8", "light": "#9ab8e8", "dark": "#6680b8", "on": "#1f1f28" },
+    "secondary": { "main": "#957fb8", "light": "#a894ca", "dark": "#7d6698", "on": "#1f1f28" },
+    "accent": { "main": "#ffa066", "light": "#ffb88c", "dark": "#e68a4a", "on": "#1f1f28" },
+    "error": { "main": "#c34043", "light": "#e82424", "dark": "#a03336", "on": "#dcd7ba" },
+    "warning": { "main": "#c0a36e", "light": "#e6c384", "dark": "#a88d5a", "on": "#1f1f28" },
+    "success": { "main": "#76946a", "light": "#98bb6c", "dark": "#5d7652", "on": "#1f1f28" },
+    "info": { "main": "#6a9589", "light": "#7aa89f", "dark": "#52766e", "on": "#1f1f28" }
+  },
+
+  "state": {
+    "hover": { "bg": "#2a2a37" },
+    "active": { "bg": "#363646" },
+    "focus": { "bg": "#363646", "ring": "#7e9cd8" },
+    "disabled": { "fg": "#727169", "bg": "#181616" },
+    "selected": { "bg": "#7e9cd8" }
+  },
+
+  "alpha": {
+    "bg": 0.93,
+    "surface": 0.95,
+    "overlay": 0.98,
+    "border": 1.0,
+    "shadow": 0.93
+  },
+
+  "typography": {
+    "font_family": "CaskaydiaMono Nerd Font",
+    "font_size": 10,
+    "monospace_family": "CaskaydiaMono Nerd Font Mono",
+    "monospace_size": 10
+  },
+
+  "spacing": {
+    "base": 4,
+    "gap": 10,
+    "radius": 10,
+    "border_width": 2
+  },
+
+  "hyprland": {
+    "active_opacity": 0.9,
+    "inactive_opacity": 0.9,
+    "rounding": 10,
+    "border_size": 2,
+    "gaps_out": 10,
+    "blur": { "enabled": false, "size": 1, "passes": 1, "noise": 0.015 },
+    "shadow": { "enabled": false, "range": 3, "render_power": 2 }
+  },
+
+  "gtk": {
+    "theme": "Kanagawa-Dark",
+    "icon_theme": "Papirus-Dark",
+    "cursor_theme": "Future-cyan-cursors",
+    "color_scheme": "prefer-dark"
+  },
+
+  "apps": {
+    "kitty": { "draw_minimal_borders": false },
+    "nvim": { "style": "dark" },
+    "starship": { "palette_name": "kanagawa" },
+    "wofi": { "format": "pywal" },
+    "zsh": { "format": "ansi" },
+    "ags": { "css_priority": "application" }
+  }
+}

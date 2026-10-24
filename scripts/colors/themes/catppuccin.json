@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Universal Theme Color Schema",
+  "description": "Single source of truth for all theming across the desktop session",
+  "version": "1.0.0",
+
+  "metadata": {
+    "name": "catppuccin",
+    "description": "Catppuccin Mocha Theme",
+    "author": "diego",
+    "variant": "dark"
+  },
+
+  "base": {
+    "bg": "#1e1e2e",
+    "bg_alt": "#181825",
+    "bg_elevated": "#313244",
+    "bg_overlay": "#45475a",
+    "fg": "#cdd6f4",
+    "fg_muted": "#a6adc8",
+    "fg_subtle": "#7f849c",
+    "border": "#313244",
+    "border_focus": "#f5c2e7",
+    "border_subtle": "#1e1e2e"
+  },
+
+  "palette": {
+    "black": "#1e1e2e",
+    "red": "#f38ba8",
+    "green": "#a6e3a1",
+    "yellow": "#f9e2af",
+    "blue": "#89b4fa",
+    "magenta": "#f5c2e7",
+    "cyan": "#94e2d5",
+    "orange": "#fab387",
+    "bright_black": "#585b70",
+    "bright_red": "#f5b3c4",
+    "bright_green": "#b5e8b3",
+    "bright_yellow": "#f9e9c4",
+    "bright_blue": "#a6c7f5",
+    "bright_magenta": "#f7d4ef",
+    "bright_cyan": "#b3e9e0",
+    "bright_white": "#bac2de"
+  },
+
+  "semantic": {
+    "primary": { "main": "#cba6f7", "light": "#dcc9f9", "dark": "#b58df0", "on": "#1e1e2e" },
+    "secondary": { "main": "#f5c2e7", "light": "#f7d4ef", "dark": "#e6a8d4", "on": "#1e1e2e" },
+    "accent": { "main": "#fab387", "light": "#fcd5b5", "dark": "#e89d6b", "on": "#1e1e2e" },
+    "error": { "main": "#f38ba8", "light": "#f5b3c4", "dark": "#e06a85", "on": "#1e1e2e" },
+    "warning": { "main": "#f9e2af", "light": "#f9e9c4", "dark": "#e6c990", "on": "#1e1e2e" },
+    "success": { "main": "#a6e3a1", "light": "#b5e8b3", "dark": "#8ac885", "on": "#1e1e2e" },
+    "info": { "main": "#89b4fa", "light": "#a6c7f5", "dark": "#6d9ae6", "on": "#1e1e2e" }
+  },
+
+  "state": {
+    "hover": { "bg": "#313244" },
+    "active": { "bg": "#45475a" },
+    "focus": { "bg": "#585b70", "ring": "#cba6f7" },
+    "disabled": { "fg": "#7f849c", "bg": "#181825" },
+    "selected": { "bg": "#cba6f7" }
+  },
+
+  "alpha": {
+    "bg": 0.93,
+    "surface": 0.95,
+    "overlay": 0.98,
+    "border": 1.0,
+    "shadow": 0.93
+  },
+
+  "typography": {
+    "font_family": "CaskaydiaMono Nerd Font",
+    "font_size": 10,
+    "monospace_family": "CaskaydiaMono Nerd Font Mono",
+    "monospace_size": 10
+  },
+
+  "spacing": {
+    "base": 4,
+    "gap": 10,
+    "radius": 10,
+    "border_width": 2
+  },
+
+  "hyprland": {
+    "active_opacity": 0.9,
+    "inactive_opacity": 0.9,
+    "rounding": 10,
+    "border_size": 2,
+    "gaps_out": 10,
+    "blur": { "enabled": false, "size": 1, "passes": 1, "noise": 0.015 },
+    "shadow": { "enabled": false, "range": 3, "render_power": 2 }
+  },
+
+  "gtk": {
+    "theme": "Catppuccin-Mocha",
+    "icon_theme": "Papirus-Dark",
+    "cursor_theme": "Future-cyan-cursors",
+    "color_scheme": "prefer-dark"
+  },
+
+  "apps": {
+    "kitty": { "draw_minimal_borders": false },
+    "nvim": { "style": "dark" },
+    "starship": { "palette_name": "catppuccin" },
+    "wofi": { "format": "pywal" },
+    "zsh": { "format": "ansi" },
+    "ags": { "css_priority": "application" }
+  }
+}

@@ -1,22 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-WOFI_CSS="/home/diego/Dotfiles/.config/wofi/style.css"
+WOFI_CSS="$HOME/.config/wofi/style.css"
+mkdir -p "$(dirname "$WOFI_CSS")"
 
-BG_COLOR="#282a36"
-AC_COLOR="#262626"
+THEME_JSON="$AGS_DIR/src/themes/theme.json"
+
+# Leer la paleta activa del tema de AGS.
+BG_COLOR=$(jq -er '.colors.bg' "$THEME_JSON")
+BG_ALT_COLOR=$(jq -er '.colors.bgAlt' "$THEME_JSON")
+FG_COLOR=$(jq -er '.colors.fg' "$THEME_JSON")
+FG_ALT_COLOR=$(jq -er '.colors.fgAlt' "$THEME_JSON")
+BD_COLOR=$(jq -er '.colors.bd' "$THEME_JSON")
+BD_ALT_COLOR=$(jq -er '.colors.bdAlt' "$THEME_JSON")
 
 # Extraer valores via hyprctl getoption
-ACTIVE_RAW=$(hyprctl getoption general:col.active_border -j | jq -r '.gradient' | cut -d' ' -f1)
-INACTIVE_RAW=$(hyprctl getoption general:col.inactive_border -j | jq -r '.gradient' | cut -d' ' -f1)
-ROUNDING=$(hyprctl getoption decoration:rounding -j | jq -r '.int // 10')
-BORDER_SIZE=$(hyprctl getoption general:border_size -j | jq -r '.int // 2')
-
-# Convertir colores de AARRGGBB a #RRGGBB
-ACTIVE_HEX="#${ACTIVE_RAW:2}"
-INACTIVE_HEX="#${INACTIVE_RAW:2}"
+ROUNDING=$(hyprctl getoption decoration:rounding -j 2>/dev/null | jq -r '.int // 10' 2>/dev/null || printf '10')
+BORDER_SIZE=$(hyprctl getoption general:border_size -j 2>/dev/null | jq -r '.int // 2' 2>/dev/null || printf '2')
 
 # Generar CSS
-cat > "$WOFI_CSS" <<EOF
+TEMP_CSS=$(mktemp "${WOFI_CSS}.XXXXXX")
+trap 'rm -f "$TEMP_CSS"' EXIT
+cat > "$TEMP_CSS" <<EOF
 * {
     font-family: CaskaydiaMono Nerd Font, monospace;
     padding: 0px;
@@ -40,28 +45,28 @@ window {
     margin: 5px;
 	margin-top: 20px;
 	margin-bottom: 20px;
-    border: ${BORDER_SIZE}px solid ${INACTIVE_HEX};
+    border: ${BORDER_SIZE}px solid ${BD_COLOR};
     padding: 0px;
     border-radius: ${ROUNDING}px;
     background-color: ${BG_COLOR};
-    color: ${INACTIVE_HEX};
+    color: ${FG_ALT_COLOR};
 }
 
 #input image {
     border: none;
     padding: 10px;
     padding-right: 15px;
-    color: ${INACTIVE_HEX};
+    color: ${FG_ALT_COLOR};
 }
 
 #input:focus image {
-    color: ${ACTIVE_HEX};
+    color: ${FG_COLOR};
 }
 
 #input:focus {
-    border: ${BORDER_SIZE}px solid ${ACTIVE_HEX};
-	background-color: alpha(${AC_COLOR}, 0.5);
-    color: ${ACTIVE_HEX};
+    border: ${BORDER_SIZE}px solid ${BD_ALT_COLOR};
+	background-color: ${BG_ALT_COLOR};
+    color: ${FG_COLOR};
 	box-shadow: none;
 }
 
@@ -79,15 +84,13 @@ window {
     padding-right: 10px;
 }
 
-
-
 #entry {
     border: ${BORDER_SIZE}px solid transparent;
     margin: 5px;
     padding: 8px;
     border-radius: ${ROUNDING}px;
     transition: all 0.2s ease-in-out;
-    color: ${ACTIVE_HEX};
+    color: ${FG_COLOR};
     background-color: transparent;
 }
 
@@ -95,13 +98,10 @@ window {
     min-width: 0;
 }
 
-
-
 #entry:selected {
-    border: ${BORDER_SIZE}px solid ${ACTIVE_HEX};
-	background-color: alpha(${AC_COLOR}, 0.5);
-    color: ${ACTIVE_HEX};
-	box-shadow: inset 0 0 ${ROUNDING}px 0px alpha(${AC_COLOR},1) ;
+    border: ${BORDER_SIZE}px solid ${BD_ALT_COLOR};
+	background-color: ${BG_ALT_COLOR};
 }
 
 EOF
+mv "$TEMP_CSS" "$WOFI_CSS"
