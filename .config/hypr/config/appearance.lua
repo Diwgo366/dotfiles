@@ -3,7 +3,7 @@ local paths = dofile(os.getenv("HOME") .. "/.config/hypr/config/paths.lua")
 local theme = dofile(paths.hypr .. "/config/theme.lua")
 
 -- Cursor
-hl.env("XCURSOR_THEME", "Future-cyan-cursors")
+hl.env("XCURSOR_THEME", "Future-cursors-cyan")
 hl.env("XCURSOR_SIZE", "24")
 
 -- Settings

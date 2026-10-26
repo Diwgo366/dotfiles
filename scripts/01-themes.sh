@@ -13,12 +13,10 @@ for command_name in git tar; do
     fi
 done
 
-sudo pacman -S --needed ttf-cascadia-mono-nerd
+sudo pacman -S --needed ttf-cascadia-mono-nerd inkscape xorg-xcursorgen
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
-
-backup_suffix="before-theme-install.$(date +%Y%m%d%H%M%S)-$$"
 
 echo "==> Instalando TokyoNight GTK..."
 git clone --depth 1 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git \
@@ -26,7 +24,7 @@ git clone --depth 1 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git
 
 tokyonight_dir="$HOME/.themes/Tokyonight-BL-LB-Dark"
 if [[ -e "$tokyonight_dir" || -L "$tokyonight_dir" ]]; then
-    mv -- "$tokyonight_dir" "$tokyonight_dir.$backup_suffix"
+    rm -rf -- "$tokyonight_dir"
 fi
 
 "$tmp_dir/Tokyonight-GTK-Theme/themes/install.sh" \
@@ -37,6 +35,7 @@ fi
 # GTK4/libadwaita lee el tema desde estos archivos de configuración del usuario.
 gtk4_source="$tokyonight_dir/gtk-4.0"
 gtk4_target="$HOME/.config/gtk-4.0"
+
 mkdir -p "$gtk4_target"
 for relative_path in assets gtk.css gtk-dark.css; do
     source_path="$gtk4_source/$relative_path"
@@ -46,39 +45,74 @@ for relative_path in assets gtk.css gtk-dark.css; do
         exit 1
     fi
     if [[ -e "$target_path" || -L "$target_path" ]]; then
-        mv -- "$target_path" "$target_path.$backup_suffix"
+        rm -rf -- "$target_path"
     fi
     ln -s -- "$source_path" "$target_path"
 done
 
-echo "==> Instalando Future Cyan XCursor..."
-git clone --depth 1 https://github.com/ChooChooAl/Cursors.git \
-    "$tmp_dir/Cursors"
+echo "==> Compilando Future Cursors Cyan..."
+cursor_repo="$tmp_dir/Future-cursors"
+git clone --depth 1 https://github.com/yeyushengfan258/Future-cursors.git "$cursor_repo"
 
-mkdir -p "$tmp_dir/future-cyan"
-tar -xf "$tmp_dir/Cursors/Future-Cyan.tar" -C "$tmp_dir/future-cyan"
+# El build oficial compila src/svg por defecto; seleccionar la variante cyan.
+sed -i \
+    -e 's/^THEME="Future Cursors"$/THEME="Future Cursors Cyan"/' \
+    -e 's/^create svg$/create svg-cyan/' \
+    "$cursor_repo/build.sh"
 
-cursor_source="$(find "$tmp_dir/future-cyan" -type d -name cursors -printf '%h\n' -quit)"
-if [[ -z "$cursor_source" || ! -f "$cursor_source/index.theme" ]]; then
-    echo "El archivo Future-Cyan.tar no contiene un tema XCursor válido." >&2
+(cd "$cursor_repo" && bash build.sh)
+
+cursor_source="$cursor_repo/dist"
+if [[ ! -f "$cursor_source/index.theme" || ! -d "$cursor_source/cursors" ]]; then
+    echo "El build no generó un tema XCursor válido en $cursor_source." >&2
     exit 1
 fi
 
-cursor_dir="$HOME/.local/share/icons/Future-cyan-cursors"
+# El repositorio ya trae index.theme, por eso el build no actualiza su nombre.
+if grep -q '^Name=' "$cursor_source/index.theme"; then
+    sed -i 's/^Name=.*/Name=Future Cursors Cyan/' "$cursor_source/index.theme"
+else
+    sed -i '/^\[Icon Theme\]/a Name=Future Cursors Cyan' "$cursor_source/index.theme"
+fi
+
+cursor_name="Future-cursors-cyan"
+cursor_dir="$HOME/.local/share/icons/$cursor_name"
+
 mkdir -p "$(dirname "$cursor_dir")"
 if [[ -e "$cursor_dir" || -L "$cursor_dir" ]]; then
-    mv -- "$cursor_dir" "$cursor_dir.$backup_suffix"
+    rm -rf -- "$cursor_dir"
 fi
-mv -- "$cursor_source" "$cursor_dir"
+cp -a -- "$cursor_source" "$cursor_dir"
 
 fc-cache -f
 
-# Activa los temas y fuentes en la sesión del usuario actual.
-gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-BL-LB-Dark'
-gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
-gsettings set org.gnome.desktop.interface cursor-theme 'Future-cyan-cursors'
-gsettings set org.gnome.desktop.interface font-name 'CaskaydiaMono Nerd Font 10'
-gsettings set org.gnome.desktop.interface monospace-font-name 'CaskaydiaMono Nerd Font Mono 10'
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+if ! command -v gsettings >/dev/null 2>&1; then
+    echo "Falta gsettings (paquete glib2); no se pueden activar los temas." >&2
+    exit 1
+fi
 
-echo "TokyoNight, Future-cyan-cursors y CaskaydiaMono Nerd Font instalados."
+# Persiste las preferencias en la configuración GSettings del usuario actual.
+set_gsetting() {
+    local key=$1
+    local value=$2
+    local actual
+
+    gsettings set org.gnome.desktop.interface "$key" "$value"
+    actual="$(gsettings get org.gnome.desktop.interface "$key")"
+    if [[ $actual != "'$value'" ]]; then
+        echo "No se pudo aplicar $key='$value' (valor actual: $actual)." >&2
+        echo "Ejecuta este instalador desde una sesión de usuario con D-Bus activo." >&2
+        exit 1
+    fi
+}
+
+set_gsetting gtk-theme 'Tokyonight-BL-LB-Dark'
+set_gsetting icon-theme 'Papirus'
+set_gsetting cursor-theme "$cursor_name"
+set_gsetting font-name 'CaskaydiaMono Nerd Font 10'
+set_gsetting monospace-font-name 'CaskaydiaMono Nerd Font Mono 10'
+set_gsetting color-scheme 'prefer-dark'
+
+echo "Tema GTK: $(gsettings get org.gnome.desktop.interface gtk-theme)"
+echo "Esquema de color: $(gsettings get org.gnome.desktop.interface color-scheme)"
+echo "TokyoNight, $cursor_name y CaskaydiaMono Nerd Font instalados y activados."

@@ -31,6 +31,7 @@ repo_packages=(
     hyprlock
     hyprpaper
     hyprpicker
+	inotify-tools
     jq
     kitty
     libnotify
