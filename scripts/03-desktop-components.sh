@@ -84,22 +84,22 @@ link_system_path() {
     local target_real
 
     source_real="$(readlink -f -- "$source")"
-    if sudo test -L "$target"; then
-        target_real="$(sudo readlink -f -- "$target" 2>/dev/null || true)"
+    if [[ -L $target ]]; then
+        target_real="$(readlink -f -- "$target" 2>/dev/null || true)"
         if [[ $target_real == "$source_real" ]]; then
             return 0
         fi
     fi
 
     sudo mkdir -p "$(dirname -- "$target")"
-    if sudo test -e "$target" || sudo test -L "$target"; then
+    if [[ -e $target || -L $target ]]; then
         sudo mv -- "$target" "$target.$backup_suffix"
     fi
     sudo ln -s -- "$source" "$target"
 }
 
 metadata="$SDDM_THEME_DIR/metadata.desktop"
-if ! sudo test -f "$metadata"; then
+if [[ ! -f $metadata ]]; then
     echo "No se encontró $metadata después de instalar SilentSDDM." >&2
     exit 1
 fi
@@ -153,60 +153,125 @@ if ! sudo -u "$SDDM_USER" test -x "$HOME"; then
     exit 1
 fi
 
-ensure_sddm_traverse() {
+collect_traverse_dirs() {
     local path=$1
     local directory
     directory="$(dirname -- "$path")"
 
     while [[ $directory != / ]]; do
-        if ! sudo -u "$SDDM_USER" test -x "$directory"; then
-            echo "==> Dando permiso de atravesar $directory al usuario $SDDM_USER..."
-            if ! sudo setfacl -m "u:$SDDM_USER:x" "$directory"; then
-                echo "No se pudo aplicar el ACL en $directory." >&2
-                return 1
-            fi
-            if ! sudo -u "$SDDM_USER" test -x "$directory"; then
-                echo "El usuario '$SDDM_USER' sigue sin poder atravesar $directory." >&2
-                return 1
-            fi
-        fi
+        printf '%s\n' "$directory"
         directory="$(dirname -- "$directory")"
     done
 }
 
+ensure_sddm_traverse() {
+    local -a dirs=()
+    local -a missing=()
+    local path directory check_output
+
+    for path in "$@"; do
+        while IFS= read -r directory; do
+            dirs+=("$directory")
+        done < <(collect_traverse_dirs "$path")
+    done
+
+    ((${#dirs[@]})) || return 0
+    mapfile -t dirs < <(printf '%s\n' "${dirs[@]}" | sort -u)
+
+    check_output="$(sudo -u "$SDDM_USER" bash -c '
+        for directory in "$@"; do
+            [[ -x $directory ]] || printf "%s\n" "$directory"
+        done
+    ' _ "${dirs[@]}")" || {
+        echo "No se pudo verificar el acceso de '$SDDM_USER' a los directorios." >&2
+        return 1
+    }
+
+    if [[ -n $check_output ]]; then
+        mapfile -t missing <<< "$check_output"
+    fi
+
+    for directory in "${missing[@]}"; do
+        echo "==> Dando permiso de atravesar $directory al usuario $SDDM_USER..."
+        if ! sudo setfacl -m "u:$SDDM_USER:x" "$directory"; then
+            echo "No se pudo aplicar el ACL en $directory." >&2
+            return 1
+        fi
+    done
+
+    if ((${#missing[@]})); then
+        check_output="$(sudo -u "$SDDM_USER" bash -c '
+            for directory in "$@"; do
+                [[ -x $directory ]] || printf "%s\n" "$directory"
+            done
+        ' _ "${missing[@]}")" || {
+            echo "No se pudo verificar el acceso de '$SDDM_USER' a los directorios." >&2
+            return 1
+        }
+        if [[ -n $check_output ]]; then
+            echo "El usuario '$SDDM_USER' sigue sin poder atravesar:" >&2
+            printf '  %s\n' "$check_output" >&2
+            return 1
+        fi
+    fi
+}
+
+targets=()
+paths_to_check=()
 for relative_path in configs/space.conf icons/lock.svg backgrounds/space.png; do
     target="$SDDM_THEME_DIR/$relative_path"
 
-    if ! sudo test -e "$target"; then
+    if [[ ! -e $target ]]; then
         echo "No existe $target o su enlace está roto; no se puede verificar el acceso de SDDM." >&2
         exit 1
     fi
 
-    resolved_target="$(sudo readlink -f -- "$target" 2>/dev/null || true)"
+    resolved_target="$(readlink -f -- "$target" 2>/dev/null || true)"
     if [[ -z $resolved_target ]]; then
         echo "No se pudo resolver el enlace $target." >&2
         exit 1
     fi
 
-    ensure_sddm_traverse "$target"
-    ensure_sddm_traverse "$resolved_target"
+    targets+=("$target")
+    paths_to_check+=("$target" "$resolved_target")
+done
 
-    if ! sudo -u "$SDDM_USER" test -r "$resolved_target"; then
+ensure_sddm_traverse "${paths_to_check[@]}" || exit 1
+
+check_output="$(sudo -u "$SDDM_USER" bash -c '
+    for file in "$@"; do
+        [[ -r $file ]] || printf "%s\n" "$file"
+    done
+' _ "${targets[@]}")" || {
+    echo "No se pudo verificar la lectura de los archivos de SDDM." >&2
+    exit 1
+}
+
+if [[ -n $check_output ]]; then
+    mapfile -t unreadable <<< "$check_output"
+    for target in "${unreadable[@]}"; do
+        resolved_target="$(readlink -f -- "$target" 2>/dev/null || true)"
         echo "==> Permitiendo al usuario $SDDM_USER leer $resolved_target..."
         if ! sudo setfacl -m "u:$SDDM_USER:r" "$resolved_target"; then
             echo "No se pudo dar permiso de lectura a '$SDDM_USER' en $resolved_target." >&2
             exit 1
         fi
-    fi
+    done
+fi
 
-    if ! sudo -u "$SDDM_USER" test -r "$target"; then
-        echo "El usuario '$SDDM_USER' no puede leer $target." >&2
-        echo "Ruta del enlace:" >&2
-        sudo namei -l -- "$target" >&2 || true
-        echo "Ruta resuelta:" >&2
-        sudo namei -l -- "$resolved_target" >&2 || true
-        exit 1
-    fi
-done
+check_output="$(sudo -u "$SDDM_USER" bash -c '
+    for file in "$@"; do
+        [[ -r $file ]] || printf "%s\n" "$file"
+    done
+' _ "${targets[@]}")" || {
+    echo "No se pudo verificar la lectura de los archivos de SDDM." >&2
+    exit 1
+}
+
+if [[ -n $check_output ]]; then
+    echo "El usuario '$SDDM_USER' no puede leer:" >&2
+    printf '  %s\n' "$check_output" >&2
+    exit 1
+fi
 
 echo "SDDM puede atravesar $HOME y leer los archivos enlazados del tema."
