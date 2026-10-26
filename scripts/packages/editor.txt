@@ -1,3 +1,0 @@
-# Editores y terminales
-nvim
-kitty

@@ -8,7 +8,6 @@ hl.env("AGS_DIR", paths.agsbar)
 
 -- Autostart
 hl.on("hyprland.start", function()
-	hl.exec_cmd(paths.agsbar .. "/scripts/wallpaper-daemon.sh")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 	hl.exec_cmd("/usr/lib/xdg-desktop-portal-hyprland")

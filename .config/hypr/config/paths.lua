@@ -6,5 +6,5 @@ return {
   home = home,
   hypr = hypr,
   scripts = hypr .. "/scripts",
-  agsbar = home .. "/Proyectos/ags",
+  agsbar = os.getenv("AGS_DIR") or home .. "/Proyectos/ags",
 }

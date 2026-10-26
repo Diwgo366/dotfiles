@@ -35,10 +35,6 @@ fi
 
 printf '%s\n' "$next_mode" > "$MODEFILE"
 
-# Clean up any legacy mpvpaper PIDs from old wallpaper.sh
-pkill -f "mpvpaper" 2>/dev/null || true
-: > "$RUNTIME_DIR/hypr-mpvpaper.pid"
-
 # Trigger daemon to reapply wallpaper with new monitor mode
 touch "$THEME_FILE" 2>/dev/null || true
 

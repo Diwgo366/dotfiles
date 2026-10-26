@@ -2,12 +2,12 @@
 # CONFIGURACIÓN DE ZSH - ARCHIVO PRINCIPAL
 # ===============================================================
 # ESTRUCTURA MODULAR:
-# - 00-colors.zsh: Definición de colores
-# - 10-aliases.zsh: Alias y atajos de comandos
-# - 20-functions.zsh: Funciones personalizadas
-# - 30-paths.zsh: Variables de entorno y PATHs
-# - 40-plugins.zsh: Configuraciones de plugins
-# - 50-zsh-config.zsh: Configuraciones específicas de zsh
+# - colors.zsh: Definición de colores
+# - aliases.zsh: Alias y atajos de comandos
+# - functions.zsh: Funciones personalizadas
+# - paths.zsh: Variables de entorno y PATHs
+# - plugins.zsh: Configuraciones de plugins
+# - zsh-config.zsh: Configuraciones específicas de zsh
 # ===============================================================
 
 export TERMINAL=kitty
@@ -137,14 +137,4 @@ EOF
 fi
 
 
-export PATH=$PATH:/home/diego/.spicetify
-export PATH="$HOME/.local/bin:$PATH"
 
-export NVM_DIR="$HOME/.nvm"
-nvm() { unset -f nvm; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; nvm "$@"; }
-node() { unset -f node; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; node "$@"; }
-npm() { unset -f npm; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; npm "$@"; }
-npx() { unset -f npx; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; npx "$@"; }
-
-# opencode
-export PATH=/home/diego/.opencode/bin:$PATH

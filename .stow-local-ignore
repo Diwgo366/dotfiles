@@ -1,7 +1,9 @@
-scripts
-\.git
-\.cache
-\.zshrc
-\.zsh\.d
-\.stow-local-ignore
-
+^scripts$
+^Media$
+^\.agents$
+^\.aws$
+^\.codex$
+^\.git$
+^\.stow-local-ignore$
+^sddm$
+^install\.sh$

@@ -25,12 +25,52 @@ hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down", hl.dsp.focus({ direction = "down" }))
 
+-- PiP window controls (without changing focus)
+local function getPipWindow()
+  for _, window in ipairs(hl.get_windows()) do
+    if window.title == "Imagen en imagen" or window.title == "Pantalla en pantalla" then
+      return window
+    end
+  end
+end
+
+local function movePip(x, y)
+  local window = getPipWindow()
+  if window then
+    hl.dispatch(hl.dsp.window.move({ window = window, x = x, y = y, relative = true }))
+  end
+end
+
+local function resizePip(x, y)
+  local window = getPipWindow()
+  if window then
+    hl.dispatch(hl.dsp.window.resize({ window = window, x = x, y = y, relative = true }))
+  end
+end
+
+hl.bind("SUPER + CTRL + left", function() movePip(-40, 0) end)
+hl.bind("SUPER + CTRL + right", function() movePip(40, 0) end)
+hl.bind("SUPER + CTRL + up", function() movePip(0, -40) end)
+hl.bind("SUPER + CTRL + down", function() movePip(0, 40) end)
+hl.bind("SUPER + CTRL + SHIFT + left", function() resizePip(-40, 0) end)
+hl.bind("SUPER + CTRL + SHIFT + right", function() resizePip(40, 0) end)
+hl.bind("SUPER + CTRL + SHIFT + up", function() resizePip(0, -40) end)
+hl.bind("SUPER + CTRL + SHIFT + down", function() resizePip(0, 40) end)
+
+hl.bind("SUPER + CTRL + P", function()
+  local window = getPipWindow()
+  local workspace = hl.get_active_workspace()
+  if window and workspace then
+    hl.dispatch(hl.dsp.window.move({ window = window, workspace = workspace.id, follow = false }))
+  end
+end)
+
 -- Workspace switching
 for i = 1, 9 do
   hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }))
   hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
 end
-hl.bind(mainMod .. " + 0", hl.dsp.exec_cmd(paths.scripts .. "/workspace/workspace10.sh"))
+hl.bind(mainMod .. " + 0", hl.dsp.focus({ workspace = 10 }))
 hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
 
 -- Scroll workspaces
