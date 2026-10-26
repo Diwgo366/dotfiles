@@ -147,77 +147,7 @@ if ! sudo setfacl -m "u:$SDDM_USER:x" "$HOME"; then
     exit 1
 fi
 
-if ! sudo -u "$SDDM_USER" test -x "$HOME"; then
-    echo "El usuario '$SDDM_USER' no puede atravesar $HOME." >&2
-    echo "Revisa los permisos de los directorios superiores con: namei -l $HOME" >&2
-    exit 1
-fi
-
-collect_traverse_dirs() {
-    local path=$1
-    local directory
-    directory="$(dirname -- "$path")"
-
-    while [[ $directory != / ]]; do
-        printf '%s\n' "$directory"
-        directory="$(dirname -- "$directory")"
-    done
-}
-
-ensure_sddm_traverse() {
-    local -a dirs=()
-    local -a missing=()
-    local path directory check_output
-
-    for path in "$@"; do
-        while IFS= read -r directory; do
-            dirs+=("$directory")
-        done < <(collect_traverse_dirs "$path")
-    done
-
-    ((${#dirs[@]})) || return 0
-    mapfile -t dirs < <(printf '%s\n' "${dirs[@]}" | sort -u)
-
-    check_output="$(sudo -u "$SDDM_USER" bash -c '
-        for directory in "$@"; do
-            [[ -x $directory ]] || printf "%s\n" "$directory"
-        done
-    ' _ "${dirs[@]}")" || {
-        echo "No se pudo verificar el acceso de '$SDDM_USER' a los directorios." >&2
-        return 1
-    }
-
-    if [[ -n $check_output ]]; then
-        mapfile -t missing <<< "$check_output"
-    fi
-
-    for directory in "${missing[@]}"; do
-        echo "==> Dando permiso de atravesar $directory al usuario $SDDM_USER..."
-        if ! sudo setfacl -m "u:$SDDM_USER:x" "$directory"; then
-            echo "No se pudo aplicar el ACL en $directory." >&2
-            return 1
-        fi
-    done
-
-    if ((${#missing[@]})); then
-        check_output="$(sudo -u "$SDDM_USER" bash -c '
-            for directory in "$@"; do
-                [[ -x $directory ]] || printf "%s\n" "$directory"
-            done
-        ' _ "${missing[@]}")" || {
-            echo "No se pudo verificar el acceso de '$SDDM_USER' a los directorios." >&2
-            return 1
-        }
-        if [[ -n $check_output ]]; then
-            echo "El usuario '$SDDM_USER' sigue sin poder atravesar:" >&2
-            printf '  %s\n' "$check_output" >&2
-            return 1
-        fi
-    fi
-}
-
 targets=()
-paths_to_check=()
 for relative_path in configs/space.conf icons/lock.svg backgrounds/space.png; do
     target="$SDDM_THEME_DIR/$relative_path"
 
@@ -226,39 +156,10 @@ for relative_path in configs/space.conf icons/lock.svg backgrounds/space.png; do
         exit 1
     fi
 
-    resolved_target="$(readlink -f -- "$target" 2>/dev/null || true)"
-    if [[ -z $resolved_target ]]; then
-        echo "No se pudo resolver el enlace $target." >&2
-        exit 1
-    fi
-
     targets+=("$target")
-    paths_to_check+=("$target" "$resolved_target")
 done
 
-ensure_sddm_traverse "${paths_to_check[@]}" || exit 1
-
-check_output="$(sudo -u "$SDDM_USER" bash -c '
-    for file in "$@"; do
-        [[ -r $file ]] || printf "%s\n" "$file"
-    done
-' _ "${targets[@]}")" || {
-    echo "No se pudo verificar la lectura de los archivos de SDDM." >&2
-    exit 1
-}
-
-if [[ -n $check_output ]]; then
-    mapfile -t unreadable <<< "$check_output"
-    for target in "${unreadable[@]}"; do
-        resolved_target="$(readlink -f -- "$target" 2>/dev/null || true)"
-        echo "==> Permitiendo al usuario $SDDM_USER leer $resolved_target..."
-        if ! sudo setfacl -m "u:$SDDM_USER:r" "$resolved_target"; then
-            echo "No se pudo dar permiso de lectura a '$SDDM_USER' en $resolved_target." >&2
-            exit 1
-        fi
-    done
-fi
-
+echo "==> Verificando que $SDDM_USER puede leer los archivos del tema..."
 check_output="$(sudo -u "$SDDM_USER" bash -c '
     for file in "$@"; do
         [[ -r $file ]] || printf "%s\n" "$file"
@@ -271,7 +172,10 @@ check_output="$(sudo -u "$SDDM_USER" bash -c '
 if [[ -n $check_output ]]; then
     echo "El usuario '$SDDM_USER' no puede leer:" >&2
     printf '  %s\n' "$check_output" >&2
+    while IFS= read -r target; do
+        sudo namei -l -- "$target" >&2 || true
+    done <<< "$check_output"
     exit 1
 fi
 
-echo "SDDM puede atravesar $HOME y leer los archivos enlazados del tema."
+echo "SDDM puede leer los archivos enlazados del tema."
