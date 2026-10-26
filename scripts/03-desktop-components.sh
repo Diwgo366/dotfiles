@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ ${EUID:-$(id -u)} -eq 0 ]]; then
+    if [[ -n ${SUDO_USER:-} && ${SUDO_USER:-} != root ]]; then
+        script_path="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
+        exec sudo -u "$SUDO_USER" -H bash "$script_path" "$@"
+    fi
+    echo "No ejecutes este script como root: instala los archivos en el HOME del usuario." >&2
+    exit 1
+fi
+
 DOTFILES="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 AGS_DIR="${AGS_DIR:-$HOME/Proyectos/ags}"
 SDDM_THEME_DIR="/usr/share/sddm/themes/silent"
+SDDM_USER="${SDDM_USER:-sddm}"
 SDDM_REPO_URL="https://github.com/uiriansan/SilentSDDM.git"
 AGS_REPO_URL="https://github.com/Diwgo366/ags-bar.git"
 
@@ -33,7 +43,7 @@ else
 fi
 
 echo "==> Instalando SilentSDDM..."
-sudo pacman -S --needed git stow sddm qt6-svg qt6-virtualkeyboard qt6-multimedia-ffmpeg qt6-imageformats
+sudo pacman -S --needed acl git stow sddm qt6-svg qt6-virtualkeyboard qt6-multimedia-ffmpeg qt6-imageformats
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -65,4 +75,37 @@ stow --restow -d "$DOTFILES/Media/Imágenes" -t "$HOME/Media/Imágenes" wallpape
 echo "==> Stoweando los archivos especiales de SDDM..."
 sudo stow --restow -d "$DOTFILES/sddm" -t / usr
 
-echo "AGS bar clonado, SilentSDDM instalado y casos especiales enlazados."
+echo "==> Permitiendo al usuario $SDDM_USER atravesar $HOME..."
+if ! id -u "$SDDM_USER" >/dev/null 2>&1; then
+    echo "No existe el usuario '$SDDM_USER'; no se puede configurar el ACL para SDDM." >&2
+    exit 1
+fi
+
+if ! command -v setfacl >/dev/null 2>&1; then
+    echo "Falta setfacl (paquete acl). Instálalo y vuelve a ejecutar el instalador." >&2
+    exit 1
+fi
+
+if ! sudo setfacl -m "u:$SDDM_USER:x" "$HOME"; then
+    echo "No se pudo dar permiso de atravesar $HOME al usuario '$SDDM_USER'." >&2
+    echo "Verifica que el sistema de archivos soporte ACL (paquete acl)." >&2
+    exit 1
+fi
+
+if ! sudo -u "$SDDM_USER" test -x "$HOME"; then
+    echo "El usuario '$SDDM_USER' no puede atravesar $HOME." >&2
+    echo "Revisa los permisos de los directorios superiores con: namei -l $HOME" >&2
+    exit 1
+fi
+
+for relative_path in configs/space.conf icons/lock.svg; do
+    target="$SDDM_THEME_DIR/$relative_path"
+    if ! sudo -u "$SDDM_USER" test -r "$target"; then
+        echo "El usuario '$SDDM_USER' no puede leer $target." >&2
+        echo "Revisa los permisos de la ruta y de los directorios superiores con:" >&2
+        echo "  namei -l $HOME" >&2
+        exit 1
+    fi
+done
+
+echo "SDDM puede atravesar $HOME y leer los archivos enlazados del tema."

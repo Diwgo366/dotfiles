@@ -1,12 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ ${EUID:-$(id -u)} -eq 0 ]]; then
+    if [[ -n ${SUDO_USER:-} && ${SUDO_USER:-} != root ]]; then
+        script_path="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
+        exec sudo -u "$SUDO_USER" -H bash "$script_path" "$@"
+    fi
+    echo "No ejecutes este script como root: yay y los paquetes del AUR no pueden instalarse como root." >&2
+    exit 1
+fi
+
 if ! command -v pacman >/dev/null 2>&1; then
     echo "Este instalador de paquetes está preparado para Arch Linux y pacman." >&2
     exit 1
 fi
 
 repo_packages=(
+    acl
     base-devel
     brightnessctl
     cliphist
@@ -76,6 +86,10 @@ else
 fi
 
 echo "==> Instalando dependencias del AUR..."
-"${aur_helper[@]}" "${aur_packages[@]}"
+if ! "${aur_helper[@]}" "${aur_packages[@]}"; then
+    echo "No se pudieron instalar los paquetes del AUR: ${aur_packages[*]}" >&2
+    echo "Revisa el error anterior o vuelve a ejecutar ./install.sh con --keep-going." >&2
+    exit 1
+fi
 
 echo "Dependencias de los dotfiles instaladas."
