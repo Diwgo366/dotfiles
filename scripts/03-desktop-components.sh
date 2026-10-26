@@ -119,20 +119,6 @@ for media_name in wallpapers profile; do
     link_user_path "$source" "$HOME/Media/Imágenes/$media_name"
 done
 
-echo "==> Limpiando enlaces antiguos incorrectos de SDDM..."
-if sudo test -L /share; then
-    share_target="$(sudo readlink -f -- /share 2>/dev/null || true)"
-    if [[ $share_target == "$DOTFILES/sddm/usr/share" ]]; then
-        sudo rm -- /share
-    fi
-elif sudo test -d /share && sudo test -L /share/sddm; then
-    share_sddm_target="$(sudo readlink -f -- /share/sddm 2>/dev/null || true)"
-    if [[ $share_sddm_target == "$DOTFILES/sddm/usr/share/sddm" ]]; then
-        sudo rm -- /share/sddm
-        sudo rmdir --ignore-fail-on-non-empty -- /share 2>/dev/null || true
-    fi
-fi
-
 echo "==> Enlazando los archivos especiales de SDDM..."
 for relative_path in configs/space.conf icons/lock.svg backgrounds/space.png; do
     source="$DOTFILES/sddm/usr/share/sddm/themes/silent/$relative_path"
