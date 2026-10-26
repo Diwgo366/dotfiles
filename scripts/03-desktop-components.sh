@@ -42,13 +42,17 @@ else
     git clone "$AGS_REPO_URL" "$AGS_DIR"
 fi
 
-echo "==> Instalando SilentSDDM..."
 sudo pacman -S --needed acl git stow sddm qt6-svg qt6-virtualkeyboard qt6-multimedia-ffmpeg qt6-imageformats
 
-tmp_dir="$(mktemp -d)"
-trap 'rm -rf "$tmp_dir"' EXIT
-git clone --depth 1 "$SDDM_REPO_URL" "$tmp_dir/SilentSDDM"
-(cd "$tmp_dir/SilentSDDM" && ./install.sh)
+if sudo test -f "$SDDM_THEME_DIR/metadata.desktop"; then
+    echo "==> SilentSDDM ya está instalado en $SDDM_THEME_DIR; se omite la reinstalación."
+else
+    echo "==> Instalando SilentSDDM..."
+    tmp_dir="$(mktemp -d)"
+    trap 'rm -rf "$tmp_dir"' EXIT
+    git clone --depth 1 "$SDDM_REPO_URL" "$tmp_dir/SilentSDDM"
+    (cd "$tmp_dir/SilentSDDM" && ./install.sh)
+fi
 
 backup_suffix="before-dotfiles-stow.$(date +%Y%m%d%H%M%S)"
 for relative_path in configs/space.conf icons/lock.svg; do
