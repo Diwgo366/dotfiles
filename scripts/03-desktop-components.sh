@@ -17,7 +17,7 @@ SDDM_USER="${SDDM_USER:-sddm}"
 SDDM_REPO_URL="https://github.com/uiriansan/SilentSDDM.git"
 AGS_REPO_URL="https://github.com/Diwgo366/ags-bar.git"
 
-for command_name in git stow sudo; do
+for command_name in git sudo; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         echo "Falta el comando requerido: $command_name" >&2
         exit 1
@@ -54,13 +54,49 @@ else
     (cd "$tmp_dir/SilentSDDM" && ./install.sh)
 fi
 
-backup_suffix="before-dotfiles-stow.$(date +%Y%m%d%H%M%S)"
-for relative_path in configs/space.conf icons/lock.svg backgrounds/space.png; do
-    target="$SDDM_THEME_DIR/$relative_path"
+backup_suffix="before-dotfiles-links.$(date +%Y%m%d%H%M%S)"
+
+link_user_path() {
+    local source=$1
+    local target=$2
+    local source_real
+    local target_real
+
+    source_real="$(readlink -f -- "$source")"
+    if [[ -L $target ]]; then
+        target_real="$(readlink -f -- "$target" 2>/dev/null || true)"
+        if [[ $target_real == "$source_real" ]]; then
+            return 0
+        fi
+    fi
+
+    mkdir -p "$(dirname -- "$target")"
+    if [[ -e $target || -L $target ]]; then
+        mv -- "$target" "$target.$backup_suffix"
+    fi
+    ln -s -- "$source" "$target"
+}
+
+link_system_path() {
+    local source=$1
+    local target=$2
+    local source_real
+    local target_real
+
+    source_real="$(readlink -f -- "$source")"
+    if sudo test -L "$target"; then
+        target_real="$(sudo readlink -f -- "$target" 2>/dev/null || true)"
+        if [[ $target_real == "$source_real" ]]; then
+            return 0
+        fi
+    fi
+
+    sudo mkdir -p "$(dirname -- "$target")"
     if sudo test -e "$target" || sudo test -L "$target"; then
         sudo mv -- "$target" "$target.$backup_suffix"
     fi
-done
+    sudo ln -s -- "$source" "$target"
+}
 
 metadata="$SDDM_THEME_DIR/metadata.desktop"
 if ! sudo test -f "$metadata"; then
@@ -72,13 +108,41 @@ sudo sed -i \
     -e 's/^# *ConfigFile=configs\/space\.conf$/ConfigFile=configs\/space.conf/' \
     "$metadata"
 
-echo "==> Stoweando wallpapers e imágenes de perfil..."
+echo "==> Enlazando wallpapers e imágenes de perfil..."
 mkdir -p "$HOME/Media/Imágenes"
-stow --restow -d "$DOTFILES/Media/Imágenes" -t "$HOME/Media/Imágenes" wallpapers profile
+for media_name in wallpapers profile; do
+    source="$DOTFILES/Media/Imágenes/$media_name"
+    if [[ ! -d $source ]]; then
+        echo "Falta el directorio $source." >&2
+        exit 1
+    fi
+    link_user_path "$source" "$HOME/Media/Imágenes/$media_name"
+done
 
-echo "==> Stoweando los archivos especiales de SDDM..."
-sudo stow -D -d "$DOTFILES/sddm" -t / usr 2>/dev/null || true
-sudo stow --restow -d "$DOTFILES" -t / sddm
+echo "==> Limpiando enlaces antiguos incorrectos de SDDM..."
+if sudo test -L /share; then
+    share_target="$(sudo readlink -f -- /share 2>/dev/null || true)"
+    if [[ $share_target == "$DOTFILES/sddm/usr/share" ]]; then
+        sudo rm -- /share
+    fi
+elif sudo test -d /share && sudo test -L /share/sddm; then
+    share_sddm_target="$(sudo readlink -f -- /share/sddm 2>/dev/null || true)"
+    if [[ $share_sddm_target == "$DOTFILES/sddm/usr/share/sddm" ]]; then
+        sudo rm -- /share/sddm
+        sudo rmdir --ignore-fail-on-non-empty -- /share 2>/dev/null || true
+    fi
+fi
+
+echo "==> Enlazando los archivos especiales de SDDM..."
+for relative_path in configs/space.conf icons/lock.svg backgrounds/space.png; do
+    source="$DOTFILES/sddm/usr/share/sddm/themes/silent/$relative_path"
+    target="$SDDM_THEME_DIR/$relative_path"
+    if [[ ! -f $source ]]; then
+        echo "Falta el archivo $source." >&2
+        exit 1
+    fi
+    link_system_path "$source" "$target"
+done
 
 echo "==> Permitiendo al usuario $SDDM_USER atravesar $HOME..."
 if ! id -u "$SDDM_USER" >/dev/null 2>&1; then
