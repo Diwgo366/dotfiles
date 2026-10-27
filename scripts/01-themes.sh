@@ -18,37 +18,42 @@ sudo pacman -S --needed ttf-cascadia-mono-nerd inkscape xorg-xcursorgen
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
-echo "==> Instalando TokyoNight GTK..."
-git clone --depth 1 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git \
-    "$tmp_dir/Tokyonight-GTK-Theme"
+echo "==> Instalando Graphite GTK (default, dark)..."
+git clone --depth 1 https://github.com/vinceliuice/Graphite-gtk-theme.git \
+    "$tmp_dir/Graphite-gtk-theme"
 
-tokyonight_dir="$HOME/.themes/Tokyonight-BL-LB-Dark"
-if [[ -e "$tokyonight_dir" || -L "$tokyonight_dir" ]]; then
-    rm -rf -- "$tokyonight_dir"
-fi
-
-"$tmp_dir/Tokyonight-GTK-Theme/themes/install.sh" \
+mkdir -p "$HOME/.themes"
+"$tmp_dir/Graphite-gtk-theme/install.sh" \
     --dest "$HOME/.themes" \
-    --name Tokyonight-BL-LB \
-    --color dark
+    --theme default \
+    --color dark \
+    --size standard \
+    --libadwaita
 
-# GTK4/libadwaita lee el tema desde estos archivos de configuración del usuario.
-gtk4_source="$tokyonight_dir/gtk-4.0"
+# Confirma que Graphite generó los archivos para GTK 3 y GTK 4.
+graphite_theme_name='Graphite-Dark'
+graphite_theme_dir="$HOME/.themes/$graphite_theme_name"
+gtk3_source="$graphite_theme_dir/gtk-3.0"
+gtk4_source="$graphite_theme_dir/gtk-4.0"
+for gtk_dir in "$gtk3_source" "$gtk4_source"; do
+    for required_file in gtk.css gtk-dark.css; do
+        if [[ ! -f "$gtk_dir/$required_file" ]]; then
+            echo "Falta un archivo del tema Graphite: $gtk_dir/$required_file" >&2
+            exit 1
+        fi
+    done
+done
+
+# GTK4/libadwaita carga la configuración instalada por --libadwaita.
 gtk4_target="$HOME/.config/gtk-4.0"
 
 mkdir -p "$gtk4_target"
-for relative_path in assets gtk.css gtk-dark.css; do
-    source_path="$gtk4_source/$relative_path"
-    target_path="$gtk4_target/$relative_path"
-    if [[ ! -e "$source_path" ]]; then
-        echo "Falta el archivo GTK4 del tema: $source_path" >&2
-        exit 1
-    fi
-    if [[ -e "$target_path" || -L "$target_path" ]]; then
-        rm -rf -- "$target_path"
-    fi
-    ln -s -- "$source_path" "$target_path"
-done
+if [[ ! -f "$gtk4_target/gtk.css" || ! -L "$gtk4_target/gtk.css" \
+    || ! -f "$gtk4_target/gtk-dark.css" || ! -L "$gtk4_target/gtk-dark.css" \
+    || ! -d "$gtk4_target/assets" || ! -L "$gtk4_target/assets" ]]; then
+    echo "Graphite no configuró GTK4/libadwaita en $gtk4_target." >&2
+    exit 1
+fi
 
 echo "==> Compilando Future Cursors Cyan..."
 cursor_repo="$tmp_dir/Future-cursors"
@@ -106,7 +111,7 @@ set_gsetting() {
     fi
 }
 
-set_gsetting gtk-theme 'Tokyonight-BL-LB-Dark'
+set_gsetting gtk-theme "$graphite_theme_name"
 set_gsetting icon-theme 'Papirus'
 set_gsetting cursor-theme "$cursor_name"
 set_gsetting font-name 'CaskaydiaMono Nerd Font 10'
@@ -115,4 +120,4 @@ set_gsetting color-scheme 'prefer-dark'
 
 echo "Tema GTK: $(gsettings get org.gnome.desktop.interface gtk-theme)"
 echo "Esquema de color: $(gsettings get org.gnome.desktop.interface color-scheme)"
-echo "TokyoNight, $cursor_name y CaskaydiaMono Nerd Font instalados y activados."
+echo "$graphite_theme_name, $cursor_name y CaskaydiaMono Nerd Font instalados y activados."
