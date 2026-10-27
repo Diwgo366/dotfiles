@@ -158,6 +158,17 @@ hl.window_rule({
   opaque = true,
 })
 
+hl.window_rule({
+  match = {
+	class = "^krita$",
+	initial_title = "^Editor de pincel — Krita$",
+  },
+  float = true,
+  center = true,
+  size = "1100 500",
+})
+
+
 -- Hyprpicker
 hl.layer_rule({
   match = {
