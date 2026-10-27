@@ -2,7 +2,7 @@ local configDir = os.getenv("HOME") .. "/.config/hypr/config"
 local paths = dofile(configDir .. "/paths.lua")
 
 -- Environment
-hl.env("GTK_THEME", "Tokyonight-BL-LB-Dark")
+hl.env("GTK_THEME", "Graphite-Dark")
 hl.env("GTK_ICON_THEME", "Papirus")
 hl.env("AGS_DIR", paths.agsbar)
 
