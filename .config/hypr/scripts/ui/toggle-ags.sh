@@ -6,7 +6,7 @@ active_address=$(hyprctl activewindow -j | jq -r '.address // empty')
 if ags list | grep -q ags; then
   ags toggle bar
 else
-  GTK_THEME=Adwaita ags run "$AGS_DIR/src/app.ts" &
+  ags run "$AGS_DIR/src/app.ts" &
 fi
 
 if [[ -n "$active_address" ]]; then
