@@ -233,7 +233,7 @@ output = str(folder / "imagenes.pdf")
 result = {"message": "", "status": 0}
 
 def run_ui(screen):
-    global output
+    global output, selected
     curses.curs_set(0)
     current = 0
     offset = 0
