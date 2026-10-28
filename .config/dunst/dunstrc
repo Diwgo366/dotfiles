@@ -1,0 +1,8 @@
+# Configuración personal de Dunst.
+
+[global]
+origin = top-right
+offset = (12, 50)
+width = 360
+height = (0, 180)
+notification_limit = 3
