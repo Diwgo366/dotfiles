@@ -267,7 +267,7 @@ def run_ui(screen):
             screen.addnstr(row, 0, f" {mark} {index + 1:>3}. {display_name}", width - 1, attr)
 
         help_row = max(list_top, height - 4)
-        screen.addnstr(help_row, 0, "↑/↓ mover  espacio marcar  [/ ] reordenar  a todas  n ninguna", width - 1)
+        screen.addnstr(help_row, 0, "↑/↓ mover  espacio marcar  {/} reordenar  a todas  n ninguna", width - 1)
         screen.addnstr(help_row + 1, 0, "o cambiar nombre de PDF  Enter crear  q salir", width - 1)
         if notice:
             screen.addnstr(help_row + 2, 0, notice, width - 1, curses.A_BOLD)
@@ -289,11 +289,11 @@ def run_ui(screen):
             selected.update(range(len(images)))
         elif key == ord("n"):
             selected.clear()
-        elif key == ord("[") and current > 0:
+        elif key == ord("{") and current > 0:
             images[current - 1], images[current] = images[current], images[current - 1]
             selected = {i - 1 if i == current else i + 1 if i == current - 1 else i for i in selected}
             current -= 1
-        elif key == ord("]") and current < len(images) - 1:
+        elif key == ord("}") and current < len(images) - 1:
             images[current + 1], images[current] = images[current], images[current + 1]
             selected = {i + 1 if i == current else i - 1 if i == current + 1 else i for i in selected}
             current += 1
@@ -302,7 +302,7 @@ def run_ui(screen):
             curses.curs_set(1)
             screen.addnstr(help_row + 2, 0, "Guardar PDF como: ", width - 1)
             screen.clrtoeol()
-            screen.addstr(help_row + 2, len("Guardar PDF como: "))
+            screen.move(help_row + 2, len("Guardar PDF como: "))
             entered = screen.getstr(help_row + 2, len("Guardar PDF como: "), max(1, width - 22)).decode(errors="replace").strip()
             curses.noecho()
             curses.curs_set(0)
