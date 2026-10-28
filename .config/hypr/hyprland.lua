@@ -14,6 +14,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("/usr/lib/xdg-desktop-portal --replace")
 	hl.exec_cmd('ags run "$AGS_DIR/src/app.ts"')
 	hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
+	hl.exec_cmd(paths.scripts .. "/system/clean-temp-download.sh")
 end)
 
 dofile(configDir .. "/input.lua")
