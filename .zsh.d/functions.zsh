@@ -188,4 +188,95 @@ pdfview() {
   clear
 }
 
+# === Crear un PDF a partir de imágenes ===
+2pdf() {
+  local output='' input_dir='.' recursive=0 have_input=0
+
+  while (( $# )); do
+    case "$1" in
+      -o|--output)
+        if (( $# < 2 )) || [[ -z "$2" ]]; then
+          print -u2 -- 'Uso: 2pdf [-r] [-o salida.pdf] [carpeta]'
+          return 2
+        fi
+        output="$2"
+        shift 2
+        ;;
+      -r|--recursive)
+        recursive=1
+        shift
+        ;;
+      -h|--help)
+        print -- 'Uso: 2pdf [-r|--recursive] [-o|--output salida.pdf] [carpeta]'
+        print -- 'Busca imágenes JPG, PNG, TIFF, BMP, GIF y WebP; las ordena alfabéticamente.'
+        print -- 'Sin carpeta, usa el directorio actual. La salida predeterminada es <carpeta>.pdf.'
+        print -- 'Requiere img2pdf. No sobrescribe archivos existentes.'
+        return 0
+        ;;
+      --)
+        shift
+        break
+        ;;
+      -* )
+        print -u2 -- "2pdf: opción desconocida: $1"
+        print -u2 -- 'Prueba: 2pdf --help'
+        return 2
+        ;;
+      *)
+        if (( have_input )); then
+          print -u2 -- 'Uso: 2pdf [-r] [-o salida.pdf] [carpeta]'
+          return 2
+        fi
+        input_dir="$1"
+        have_input=1
+        shift
+        ;;
+    esac
+  done
+
+  if (( $# )); then
+    print -u2 -- '2pdf: solo se admite una carpeta de entrada.'
+    return 2
+  fi
+  if [[ ! -d "$input_dir" ]]; then
+    print -u2 -- "2pdf: no existe la carpeta: $input_dir"
+    return 1
+  fi
+  if ! (( $+commands[img2pdf] )); then
+    print -u2 -- '2pdf: se requiere img2pdf (instálalo con tu gestor de paquetes o pip).'
+    return 1
+  fi
+
+  # glob qualifiers de zsh hacen el filtrado sin dividir nombres con espacios.
+  setopt local_options extended_glob null_glob
+  local pattern='(#i)*.(jpg|jpeg|png|tif|tiff|bmp|gif|webp)'
+  local -a paths
+  if (( recursive )); then
+    paths=("$input_dir"/**/$~pattern(N.:))
+  else
+    paths=("$input_dir"/$~pattern(N.:))
+  fi
+  if (( ${#paths} == 0 )); then
+    print -u2 -- "2pdf: no encontré imágenes compatibles en: $input_dir"
+    return 1
+  fi
+
+  if [[ -z "$output" ]]; then
+    local dir_name="${input_dir%/}"
+    [[ -z "$dir_name" || "$dir_name" == '.' ]] && dir_name='imagenes'
+    output="${dir_name:t}.pdf"
+  fi
+  [[ "$output" == *.pdf ]] || output+='.pdf'
+  if [[ -e "$output" ]]; then
+    print -u2 -- "2pdf: ya existe la salida: $output"
+    return 1
+  fi
+
+  command img2pdf --output "$output" -- "${paths[@]}" || {
+    print -u2 -- '2pdf: falló la creación del PDF.'
+    return 1
+  }
+  print -- "PDF creado: $output (${#paths} imágenes)"
+}
+
 
