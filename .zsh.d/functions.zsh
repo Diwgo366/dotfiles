@@ -234,6 +234,7 @@ result = {"message": "", "status": 0}
 
 def run_ui(screen):
     global output, selected
+    screen.keypad(True)
     curses.curs_set(0)
     current = 0
     offset = 0
