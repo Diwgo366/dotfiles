@@ -192,9 +192,9 @@ pdfview() {
 2pdf() {
   if (( $# )) && [[ "$1" == -h || "$1" == --help ]]; then
     print -- 'Uso: 2pdf [-r|--recursive]'
-    print -- 'Abre una ventana para elegir imágenes, ordenarlas y guardar el PDF.'
+    print -- 'Abre una interfaz en la terminal para elegir imágenes, ordenarlas y guardar el PDF.'
     print -- 'Por defecto carga las imágenes de la carpeta actual; -r incluye subcarpetas.'
-    print -- 'Requiere python3, tkinter e img2pdf.'
+    print -- 'Requiere python3 e img2pdf.'
     return 0
   fi
 
@@ -215,120 +215,122 @@ pdfview() {
   fi
 
   command python3 - "$recursive" <<'PY'
-import os
+import curses
 import subprocess
 import sys
-import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
 
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".gif", ".webp"}
 recursive = sys.argv[1] == "1"
-root = tk.Tk()
-root.title("Crear PDF desde imágenes")
-root.geometry("760x480")
-root.minsize(560, 360)
-images = []
 folder = Path.cwd()
+candidates = folder.rglob("*") if recursive else folder.iterdir()
+images = sorted(
+    (path for path in candidates if path.is_file() and path.suffix.lower() in EXTENSIONS),
+    key=lambda path: str(path).casefold(),
+)
+selected = set(range(len(images)))
+output = str(folder / "imagenes.pdf")
+result = {"message": "", "status": 0}
 
-top = ttk.Frame(root, padding=(12, 12, 12, 6))
-top.pack(fill="x")
-folder_var = tk.StringVar(value=str(folder))
-ttk.Label(top, text="Carpeta:").pack(side="left")
-ttk.Label(top, textvariable=folder_var).pack(side="left", padx=8, fill="x", expand=True)
+def run_ui(screen):
+    global output
+    curses.curs_set(0)
+    current = 0
+    offset = 0
+    notice = ""
 
-body = ttk.Frame(root, padding=(12, 4, 12, 8))
-body.pack(fill="both", expand=True)
-listing = tk.Listbox(body, selectmode=tk.EXTENDED, activestyle="dotbox")
-listing.pack(side="left", fill="both", expand=True)
-scroll = ttk.Scrollbar(body, orient="vertical", command=listing.yview)
-scroll.pack(side="left", fill="y")
-listing.configure(yscrollcommand=scroll.set)
+    while True:
+        screen.erase()
+        height, width = screen.getmaxyx()
+        screen.addnstr(0, 0, "  2PDF · Imágenes a PDF", width - 1, curses.A_BOLD)
+        screen.addnstr(1, 0, f"  Carpeta: {folder}", width - 1)
+        screen.addnstr(2, 0, f"  Seleccionadas: {len(selected)}/{len(images)}  ·  PDF: {output}", width - 1)
+        screen.addnstr(3, 0, "─" * max(0, width - 1), width - 1)
 
-buttons = ttk.Frame(body, padding=(10, 0, 0, 0))
-buttons.pack(side="left", fill="y")
+        list_top = 4
+        footer_rows = 4
+        visible = max(1, height - list_top - footer_rows)
+        if current < offset:
+            offset = current
+        elif current >= offset + visible:
+            offset = current - visible + 1
 
-def refresh():
-    listing.delete(0, tk.END)
-    for path in images:
-        listing.insert(tk.END, str(path.relative_to(folder)) if path.is_relative_to(folder) else str(path))
+        for row, index in enumerate(range(offset, min(len(images), offset + visible)), start=list_top):
+            mark = "[x]" if index in selected else "[ ]"
+            try:
+                display_name = str(images[index].relative_to(folder))
+            except ValueError:
+                display_name = str(images[index])
+            attr = curses.A_REVERSE if index == current else curses.A_NORMAL
+            screen.addnstr(row, 0, f" {mark} {index + 1:>3}. {display_name}", width - 1, attr)
 
-def scan(path, recurse=recursive):
-    global folder, images
-    folder = Path(path)
-    folder_var.set(str(folder))
-    candidates = folder.rglob("*") if recurse else folder.iterdir()
-    images = sorted((p for p in candidates if p.is_file() and p.suffix.lower() in EXTENSIONS), key=lambda p: str(p).casefold())
-    refresh()
+        help_row = max(list_top, height - 4)
+        screen.addnstr(help_row, 0, "↑/↓ mover  espacio marcar  [/ ] reordenar  a todas  n ninguna", width - 1)
+        screen.addnstr(help_row + 1, 0, "o cambiar nombre de PDF  Enter crear  q salir", width - 1)
+        if notice:
+            screen.addnstr(help_row + 2, 0, notice, width - 1, curses.A_BOLD)
+        screen.refresh()
 
-def choose_folder():
-    path = filedialog.askdirectory(initialdir=folder, title="Seleccionar carpeta")
-    if path:
-        scan(path)
+        key = screen.getch()
+        if key in (ord("q"), 27):
+            return
+        if key in (curses.KEY_UP, ord("k")) and images:
+            current = max(0, current - 1)
+        elif key in (curses.KEY_DOWN, ord("j")) and images:
+            current = min(len(images) - 1, current + 1)
+        elif key == ord(" ") and images:
+            if current in selected:
+                selected.remove(current)
+            else:
+                selected.add(current)
+        elif key == ord("a"):
+            selected.update(range(len(images)))
+        elif key == ord("n"):
+            selected.clear()
+        elif key == ord("[") and current > 0:
+            images[current - 1], images[current] = images[current], images[current - 1]
+            selected = {i - 1 if i == current else i + 1 if i == current - 1 else i for i in selected}
+            current -= 1
+        elif key == ord("]") and current < len(images) - 1:
+            images[current + 1], images[current] = images[current], images[current + 1]
+            selected = {i + 1 if i == current else i - 1 if i == current + 1 else i for i in selected}
+            current += 1
+        elif key == ord("o"):
+            curses.echo()
+            curses.curs_set(1)
+            screen.addnstr(help_row + 2, 0, "Guardar PDF como: ", width - 1)
+            screen.clrtoeol()
+            screen.addstr(help_row + 2, len("Guardar PDF como: "))
+            entered = screen.getstr(help_row + 2, len("Guardar PDF como: "), max(1, width - 22)).decode(errors="replace").strip()
+            curses.noecho()
+            curses.curs_set(0)
+            if entered:
+                output = entered if entered.lower().endswith(".pdf") else entered + ".pdf"
+        elif key in (curses.KEY_ENTER, 10, 13):
+            ordered = [str(path) for index, path in enumerate(images) if index in selected]
+            if not ordered:
+                notice = "Marca al menos una imagen con espacio."
+                continue
+            if Path(output).exists():
+                notice = f"{output} ya existe. Pulsa o para elegir otro nombre, o q para salir."
+                continue
+            try:
+                subprocess.run(["img2pdf", "--output", output, "--", *ordered], check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as error:
+                result["message"] = error.stderr.strip() or str(error)
+                result["status"] = 1
+                return
+            result["message"] = f"PDF creado: {output} ({len(ordered)} imágenes)"
+            return
 
-def add_images():
-    chosen = filedialog.askopenfilenames(
-        initialdir=folder, title="Agregar imágenes",
-        filetypes=[("Imágenes", "*.jpg *.jpeg *.png *.tif *.tiff *.bmp *.gif *.webp"), ("Todos los archivos", "*.*")],
-    )
-    known = set(images)
-    images.extend(Path(p) for p in chosen if Path(p) not in known)
-    refresh()
+if not images:
+    print(f"2pdf: no encontré imágenes compatibles en {folder}", file=sys.stderr)
+    sys.exit(1)
 
-def remove_selected():
-    for index in reversed(listing.curselection()):
-        del images[index]
-    refresh()
-
-def move_selected(direction):
-    selected = list(listing.curselection())
-    if not selected:
-        return
-    indexes = selected if direction < 0 else list(reversed(selected))
-    for index in indexes:
-        target = index + direction
-        if 0 <= target < len(images):
-            images[index], images[target] = images[target], images[index]
-    refresh()
-    for index in (i + direction for i in selected):
-        if 0 <= index < len(images):
-            listing.selection_set(index)
-
-def create_pdf():
-    if not images:
-        messagebox.showwarning("Sin imágenes", "Agrega al menos una imagen.", parent=root)
-        return
-    default_name = (folder.name or "imagenes") + ".pdf"
-    output = filedialog.asksaveasfilename(
-        initialdir=folder, initialfile=default_name, title="Guardar PDF",
-        defaultextension=".pdf", filetypes=[("Archivo PDF", "*.pdf")],
-    )
-    if not output:
-        return
-    if os.path.exists(output) and not messagebox.askyesno("Confirmar", "El archivo ya existe. ¿Sobrescribirlo?", parent=root):
-        return
-    try:
-        subprocess.run(["img2pdf", "--output", output, "--", *map(str, images)], check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as error:
-        messagebox.showerror("Error al crear el PDF", error.stderr.strip() or str(error), parent=root)
-        return
-    messagebox.showinfo("PDF creado", f"Se guardó el PDF con {len(images)} imágenes:\n{output}", parent=root)
-    root.destroy()
-
-ttk.Button(buttons, text="Elegir carpeta…", command=choose_folder).pack(fill="x", pady=3)
-ttk.Button(buttons, text="Agregar imágenes…", command=add_images).pack(fill="x", pady=3)
-ttk.Separator(buttons).pack(fill="x", pady=8)
-ttk.Button(buttons, text="Subir ↑", command=lambda: move_selected(-1)).pack(fill="x", pady=3)
-ttk.Button(buttons, text="Bajar ↓", command=lambda: move_selected(1)).pack(fill="x", pady=3)
-ttk.Button(buttons, text="Quitar", command=remove_selected).pack(fill="x", pady=3)
-ttk.Label(root, text="El orden de la lista será el orden de las páginas.", padding=(12, 0)).pack(anchor="w")
-bottom = ttk.Frame(root, padding=12)
-bottom.pack(fill="x")
-ttk.Button(bottom, text="Cancelar", command=root.destroy).pack(side="right")
-ttk.Button(bottom, text="Crear PDF…", command=create_pdf).pack(side="right", padx=8)
-
-scan(folder)
-root.mainloop()
+curses.wrapper(run_ui)
+if result["message"]:
+    print(result["message"], file=sys.stderr if result["status"] else sys.stdout)
+sys.exit(result["status"])
 PY
 }
 
