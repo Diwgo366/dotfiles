@@ -2,7 +2,7 @@
 
 [global]
 origin = bottom-right
-offset = (10, 50)
+offset = (0, 50)
 width = 360
 height = (0, 180)
 notification_limit = 3
