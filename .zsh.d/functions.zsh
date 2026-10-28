@@ -217,6 +217,8 @@ pdfview() {
   local script
   script=$(command cat <<'PY'
 import curses
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -235,24 +237,23 @@ selected = set(range(len(images)))
 rotations = {path: 0 for path in images}
 output = str(folder / "imagenes.pdf")
 result = {"message": "", "status": 0}
+kitty_available = bool(os.environ.get("KITTY_WINDOW_ID")) and shutil.which("kitty") is not None
+preview_temp = tempfile.TemporaryDirectory(prefix="2pdf-preview-")
+preview_cache = {}
 
-def make_preview(path, width, height, angle):
-    ramp = " .:-=+*#%@"
-    with Image.open(path) as source:
-        image = ImageOps.exif_transpose(source)
-        if angle:
+def preview_file(path, angle):
+    if not angle:
+        return path
+    key = (path, angle)
+    if key not in preview_cache:
+        with Image.open(path) as source:
+            image = ImageOps.exif_transpose(source)
             image = image.rotate(-angle, expand=True)
-        original_size = image.size
-        scale = min(width / image.width, (height * 2) / image.height)
-        columns = max(1, min(width, int(image.width * scale)))
-        rows = max(1, min(height, int(image.height * scale / 2)))
-        image = image.convert("L").resize((columns, rows))
-        pixels = image.load()
-        lines = [
-            "".join(ramp[pixels[x, y] * (len(ramp) - 1) // 255] for x in range(columns))
-            for y in range(rows)
-        ]
-        return lines, original_size
+            image = image.convert("RGBA" if "A" in image.getbands() else "RGB")
+            target = Path(preview_temp.name) / f"preview-{len(preview_cache):04d}.png"
+            image.save(target, format="PNG")
+            preview_cache[key] = target
+    return preview_cache[key]
 
 def run_ui(screen):
     global output, selected
@@ -261,8 +262,10 @@ def run_ui(screen):
     current = 0
     offset = 0
     notice = ""
+    last_preview = None
 
     while True:
+        preview_request = None
         screen.erase()
         height, width = screen.getmaxyx()
         split = max(30, width * 2 // 5)
@@ -306,16 +309,32 @@ def run_ui(screen):
             angle = rotations.get(path, 0)
             preview_height = max(1, help_row - preview_title_row - 2)
             try:
-                lines, dimensions = make_preview(path, panel_width, preview_height, angle)
+                with Image.open(path) as image:
+                    dimensions = ImageOps.exif_transpose(image).size
                 screen.addnstr(preview_title_row + 1, right_x, f"{path.name} · {dimensions[0]}×{dimensions[1]} · {angle}°", panel_width)
-                for row, line in enumerate(lines[:preview_height], start=preview_title_row + 2):
-                    screen.addnstr(row, right_x, line, panel_width)
+                if kitty_available:
+                    preview_y = preview_title_row + 2
+                    preview_key = (path, angle, panel_width, preview_height, right_x, preview_y)
+                    if preview_key != last_preview:
+                        preview_request = (preview_key, path, angle, panel_width, preview_height, right_x, preview_y)
+                else:
+                    screen.addnstr(preview_title_row + 2, right_x, "La vista de imagen requiere Kitty.", panel_width)
             except Exception as error:
                 screen.addnstr(preview_title_row + 1, right_x, "No se pudo previsualizar", panel_width)
                 screen.addnstr(preview_title_row + 2, right_x, str(error), panel_width)
         elif width < 72:
             screen.addnstr(preview_title_row + 1, right_x, "Amplía la terminal para ver la imagen.", panel_width)
         screen.refresh()
+        if preview_request:
+            preview_key, path, angle, panel_width, preview_height, right_x, preview_y = preview_request
+            subprocess.run(["kitty", "+kitten", "icat", "--clear"], stdout=None, stderr=subprocess.DEVNULL, check=False)
+            subprocess.run(
+                ["kitty", "+kitten", "icat", "--stdin=no", "--align=left", "--scale-up",
+                 "--z-index=1", "--place", f"{panel_width}x{preview_height}@{right_x}x{preview_y}",
+                 str(preview_file(path, angle))],
+                stdout=None, stderr=subprocess.DEVNULL, check=False,
+            )
+            last_preview = preview_key
 
         key = screen.getch()
         if key in (ord("q"), 27):
@@ -397,6 +416,9 @@ if not images:
     sys.exit(1)
 
 curses.wrapper(run_ui)
+if kitty_available:
+    subprocess.run(["kitty", "+kitten", "icat", "--clear"], stdout=None, stderr=subprocess.DEVNULL, check=False)
+preview_temp.cleanup()
 if result["message"]:
     print(result["message"], file=sys.stderr if result["status"] else sys.stdout)
 sys.exit(result["status"])
