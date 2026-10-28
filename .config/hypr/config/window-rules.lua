@@ -200,3 +200,11 @@ hl.layer_rule({
   },
   no_anim = true,
 })
+
+-- Dunst: las notificaciones entran desde la derecha hacia la izquierda.
+hl.layer_rule({
+  match = {
+    namespace = "notifications",
+  },
+  animation = "slide right",
+})
