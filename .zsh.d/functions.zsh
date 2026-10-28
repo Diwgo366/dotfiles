@@ -190,93 +190,146 @@ pdfview() {
 
 # === Crear un PDF a partir de imágenes ===
 2pdf() {
-  local output='' input_dir='.' recursive=0 have_input=0
+  if (( $# )) && [[ "$1" == -h || "$1" == --help ]]; then
+    print -- 'Uso: 2pdf [-r|--recursive]'
+    print -- 'Abre una ventana para elegir imágenes, ordenarlas y guardar el PDF.'
+    print -- 'Por defecto carga las imágenes de la carpeta actual; -r incluye subcarpetas.'
+    print -- 'Requiere python3, tkinter e img2pdf.'
+    return 0
+  fi
 
-  while (( $# )); do
-    case "$1" in
-      -o|--output)
-        if (( $# < 2 )) || [[ -z "$2" ]]; then
-          print -u2 -- 'Uso: 2pdf [-r] [-o salida.pdf] [carpeta]'
-          return 2
-        fi
-        output="$2"
-        shift 2
-        ;;
-      -r|--recursive)
-        recursive=1
-        shift
-        ;;
-      -h|--help)
-        print -- 'Uso: 2pdf [-r|--recursive] [-o|--output salida.pdf] [carpeta]'
-        print -- 'Busca imágenes JPG, PNG, TIFF, BMP, GIF y WebP; las ordena alfabéticamente.'
-        print -- 'Sin carpeta, usa el directorio actual. La salida predeterminada es <carpeta>.pdf.'
-        print -- 'Requiere img2pdf. No sobrescribe archivos existentes.'
-        return 0
-        ;;
-      --)
-        shift
-        break
-        ;;
-      -* )
-        print -u2 -- "2pdf: opción desconocida: $1"
-        print -u2 -- 'Prueba: 2pdf --help'
-        return 2
-        ;;
-      *)
-        if (( have_input )); then
-          print -u2 -- 'Uso: 2pdf [-r] [-o salida.pdf] [carpeta]'
-          return 2
-        fi
-        input_dir="$1"
-        have_input=1
-        shift
-        ;;
-    esac
-  done
-
-  if (( $# )); then
-    print -u2 -- '2pdf: solo se admite una carpeta de entrada.'
+  local recursive=0
+  if (( $# == 1 )) && [[ "$1" == -r || "$1" == --recursive ]]; then
+    recursive=1
+  elif (( $# )); then
+    print -u2 -- 'Uso: 2pdf [-r|--recursive]'
     return 2
   fi
-  if [[ ! -d "$input_dir" ]]; then
-    print -u2 -- "2pdf: no existe la carpeta: $input_dir"
+  if ! (( $+commands[python3] )); then
+    print -u2 -- '2pdf: se requiere python3.'
     return 1
   fi
   if ! (( $+commands[img2pdf] )); then
-    print -u2 -- '2pdf: se requiere img2pdf (instálalo con tu gestor de paquetes o pip).'
+    print -u2 -- '2pdf: se requiere img2pdf.'
     return 1
   fi
 
-  # glob qualifiers de zsh hacen el filtrado sin dividir nombres con espacios.
-  setopt local_options extended_glob null_glob
-  local pattern='(#i)*.(jpg|jpeg|png|tif|tiff|bmp|gif|webp)'
-  local -a paths
-  if (( recursive )); then
-    paths=("$input_dir"/**/$~pattern(N.:))
-  else
-    paths=("$input_dir"/$~pattern(N.:))
-  fi
-  if (( ${#paths} == 0 )); then
-    print -u2 -- "2pdf: no encontré imágenes compatibles en: $input_dir"
-    return 1
-  fi
+  command python3 - "$recursive" <<'PY'
+import os
+import subprocess
+import sys
+import tkinter as tk
+from pathlib import Path
+from tkinter import filedialog, messagebox, ttk
 
-  if [[ -z "$output" ]]; then
-    local dir_name="${input_dir%/}"
-    [[ -z "$dir_name" || "$dir_name" == '.' ]] && dir_name='imagenes'
-    output="${dir_name:t}.pdf"
-  fi
-  [[ "$output" == *.pdf ]] || output+='.pdf'
-  if [[ -e "$output" ]]; then
-    print -u2 -- "2pdf: ya existe la salida: $output"
-    return 1
-  fi
+EXTENSIONS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".gif", ".webp"}
+recursive = sys.argv[1] == "1"
+root = tk.Tk()
+root.title("Crear PDF desde imágenes")
+root.geometry("760x480")
+root.minsize(560, 360)
+images = []
+folder = Path.cwd()
 
-  command img2pdf --output "$output" -- "${paths[@]}" || {
-    print -u2 -- '2pdf: falló la creación del PDF.'
-    return 1
-  }
-  print -- "PDF creado: $output (${#paths} imágenes)"
+top = ttk.Frame(root, padding=(12, 12, 12, 6))
+top.pack(fill="x")
+folder_var = tk.StringVar(value=str(folder))
+ttk.Label(top, text="Carpeta:").pack(side="left")
+ttk.Label(top, textvariable=folder_var).pack(side="left", padx=8, fill="x", expand=True)
+
+body = ttk.Frame(root, padding=(12, 4, 12, 8))
+body.pack(fill="both", expand=True)
+listing = tk.Listbox(body, selectmode=tk.EXTENDED, activestyle="dotbox")
+listing.pack(side="left", fill="both", expand=True)
+scroll = ttk.Scrollbar(body, orient="vertical", command=listing.yview)
+scroll.pack(side="left", fill="y")
+listing.configure(yscrollcommand=scroll.set)
+
+buttons = ttk.Frame(body, padding=(10, 0, 0, 0))
+buttons.pack(side="left", fill="y")
+
+def refresh():
+    listing.delete(0, tk.END)
+    for path in images:
+        listing.insert(tk.END, str(path.relative_to(folder)) if path.is_relative_to(folder) else str(path))
+
+def scan(path, recurse=recursive):
+    global folder, images
+    folder = Path(path)
+    folder_var.set(str(folder))
+    candidates = folder.rglob("*") if recurse else folder.iterdir()
+    images = sorted((p for p in candidates if p.is_file() and p.suffix.lower() in EXTENSIONS), key=lambda p: str(p).casefold())
+    refresh()
+
+def choose_folder():
+    path = filedialog.askdirectory(initialdir=folder, title="Seleccionar carpeta")
+    if path:
+        scan(path)
+
+def add_images():
+    chosen = filedialog.askopenfilenames(
+        initialdir=folder, title="Agregar imágenes",
+        filetypes=[("Imágenes", "*.jpg *.jpeg *.png *.tif *.tiff *.bmp *.gif *.webp"), ("Todos los archivos", "*.*")],
+    )
+    known = set(images)
+    images.extend(Path(p) for p in chosen if Path(p) not in known)
+    refresh()
+
+def remove_selected():
+    for index in reversed(listing.curselection()):
+        del images[index]
+    refresh()
+
+def move_selected(direction):
+    selected = list(listing.curselection())
+    if not selected:
+        return
+    indexes = selected if direction < 0 else list(reversed(selected))
+    for index in indexes:
+        target = index + direction
+        if 0 <= target < len(images):
+            images[index], images[target] = images[target], images[index]
+    refresh()
+    for index in (i + direction for i in selected):
+        if 0 <= index < len(images):
+            listing.selection_set(index)
+
+def create_pdf():
+    if not images:
+        messagebox.showwarning("Sin imágenes", "Agrega al menos una imagen.", parent=root)
+        return
+    default_name = (folder.name or "imagenes") + ".pdf"
+    output = filedialog.asksaveasfilename(
+        initialdir=folder, initialfile=default_name, title="Guardar PDF",
+        defaultextension=".pdf", filetypes=[("Archivo PDF", "*.pdf")],
+    )
+    if not output:
+        return
+    if os.path.exists(output) and not messagebox.askyesno("Confirmar", "El archivo ya existe. ¿Sobrescribirlo?", parent=root):
+        return
+    try:
+        subprocess.run(["img2pdf", "--output", output, "--", *map(str, images)], check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as error:
+        messagebox.showerror("Error al crear el PDF", error.stderr.strip() or str(error), parent=root)
+        return
+    messagebox.showinfo("PDF creado", f"Se guardó el PDF con {len(images)} imágenes:\n{output}", parent=root)
+    root.destroy()
+
+ttk.Button(buttons, text="Elegir carpeta…", command=choose_folder).pack(fill="x", pady=3)
+ttk.Button(buttons, text="Agregar imágenes…", command=add_images).pack(fill="x", pady=3)
+ttk.Separator(buttons).pack(fill="x", pady=8)
+ttk.Button(buttons, text="Subir ↑", command=lambda: move_selected(-1)).pack(fill="x", pady=3)
+ttk.Button(buttons, text="Bajar ↓", command=lambda: move_selected(1)).pack(fill="x", pady=3)
+ttk.Button(buttons, text="Quitar", command=remove_selected).pack(fill="x", pady=3)
+ttk.Label(root, text="El orden de la lista será el orden de las páginas.", padding=(12, 0)).pack(anchor="w")
+bottom = ttk.Frame(root, padding=12)
+bottom.pack(fill="x")
+ttk.Button(bottom, text="Cancelar", command=root.destroy).pack(side="right")
+ttk.Button(bottom, text="Crear PDF…", command=create_pdf).pack(side="right", padx=8)
+
+scan(folder)
+root.mainloop()
+PY
 }
 
 
