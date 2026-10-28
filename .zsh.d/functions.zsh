@@ -219,7 +219,9 @@ pdfview() {
 import curses
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
+from PIL import Image, ImageOps
 
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".gif", ".webp"}
 recursive = sys.argv[1] == "1"
@@ -230,8 +232,27 @@ images = sorted(
     key=lambda path: str(path).casefold(),
 )
 selected = set(range(len(images)))
+rotations = {path: 0 for path in images}
 output = str(folder / "imagenes.pdf")
 result = {"message": "", "status": 0}
+
+def make_preview(path, width, height, angle):
+    ramp = " .:-=+*#%@"
+    with Image.open(path) as source:
+        image = ImageOps.exif_transpose(source)
+        if angle:
+            image = image.rotate(-angle, expand=True)
+        original_size = image.size
+        scale = min(width / image.width, (height * 2) / image.height)
+        columns = max(1, min(width, int(image.width * scale)))
+        rows = max(1, min(height, int(image.height * scale / 2)))
+        image = image.convert("L").resize((columns, rows))
+        pixels = image.load()
+        lines = [
+            "".join(ramp[pixels[x, y] * (len(ramp) - 1) // 255] for x in range(columns))
+            for y in range(rows)
+        ]
+        return lines, original_size
 
 def run_ui(screen):
     global output, selected
@@ -244,10 +265,16 @@ def run_ui(screen):
     while True:
         screen.erase()
         height, width = screen.getmaxyx()
+        split = max(30, width * 2 // 5)
+        right_x = split + 2
+        panel_width = max(1, width - right_x - 1)
         screen.addnstr(0, 0, "  2PDF · Imágenes a PDF", width - 1, curses.A_BOLD)
         screen.addnstr(1, 0, f"  Carpeta: {folder}", width - 1)
         screen.addnstr(2, 0, f"  Seleccionadas: {len(selected)}/{len(images)}  ·  PDF: {output}", width - 1)
         screen.addnstr(3, 0, "─" * max(0, width - 1), width - 1)
+        if split < width - 1:
+            for y in range(3, max(4, height - 4)):
+                screen.addch(y, split, "│")
 
         list_top = 4
         footer_rows = 4
@@ -267,10 +294,27 @@ def run_ui(screen):
             screen.addnstr(row, 0, f" {mark} {index + 1:>3}. {display_name}", width - 1, attr)
 
         help_row = max(list_top, height - 4)
-        screen.addnstr(help_row, 0, "↑/↓ mover  espacio marcar  {/} reordenar  a todas  n ninguna", width - 1)
-        screen.addnstr(help_row + 1, 0, "o cambiar nombre de PDF  Enter crear  q salir", width - 1)
+        screen.addnstr(help_row, 0, "↑/↓ mover  espacio marcar  {/} reordenar  r rotar", width - 1)
+        screen.addnstr(help_row + 1, 0, "a todas  n ninguna  o nombre  Enter crear  q salir", width - 1)
         if notice:
             screen.addnstr(help_row + 2, 0, notice, width - 1, curses.A_BOLD)
+
+        preview_title_row = 4
+        screen.addnstr(preview_title_row, right_x, "Vista previa", panel_width, curses.A_BOLD)
+        if images and panel_width >= 8:
+            path = images[current]
+            angle = rotations.get(path, 0)
+            preview_height = max(1, help_row - preview_title_row - 2)
+            try:
+                lines, dimensions = make_preview(path, panel_width, preview_height, angle)
+                screen.addnstr(preview_title_row + 1, right_x, f"{path.name} · {dimensions[0]}×{dimensions[1]} · {angle}°", panel_width)
+                for row, line in enumerate(lines[:preview_height], start=preview_title_row + 2):
+                    screen.addnstr(row, right_x, line, panel_width)
+            except Exception as error:
+                screen.addnstr(preview_title_row + 1, right_x, "No se pudo previsualizar", panel_width)
+                screen.addnstr(preview_title_row + 2, right_x, str(error), panel_width)
+        elif width < 72:
+            screen.addnstr(preview_title_row + 1, right_x, "Amplía la terminal para ver la imagen.", panel_width)
         screen.refresh()
 
         key = screen.getch()
@@ -297,6 +341,9 @@ def run_ui(screen):
             images[current + 1], images[current] = images[current], images[current + 1]
             selected = {i + 1 if i == current else i - 1 if i == current + 1 else i for i in selected}
             current += 1
+        elif key == ord("r") and images:
+            path = images[current]
+            rotations[path] = (rotations.get(path, 0) + 90) % 360
         elif key == ord("o"):
             curses.echo()
             curses.curs_set(1)
@@ -317,9 +364,29 @@ def run_ui(screen):
                 notice = f"{output} ya existe. Pulsa o para elegir otro nombre, o q para salir."
                 continue
             try:
-                subprocess.run(["img2pdf", "--output", output, "--", *ordered], check=True, capture_output=True, text=True)
+                with tempfile.TemporaryDirectory(prefix="2pdf-") as temp_dir:
+                    rotated_files = []
+                    for index, image_path in enumerate(images):
+                        if index not in selected:
+                            continue
+                        angle = rotations.get(image_path, 0)
+                        if not angle:
+                            rotated_files.append(str(image_path))
+                            continue
+                        with Image.open(image_path) as source:
+                            image = ImageOps.exif_transpose(source)
+                            image = image.rotate(-angle, expand=True)
+                            image = image.convert("RGBA" if "A" in image.getbands() else "RGB")
+                            rotated_path = Path(temp_dir) / f"rotated-{len(rotated_files):04d}.png"
+                            image.save(rotated_path, format="PNG")
+                            rotated_files.append(str(rotated_path))
+                    subprocess.run(["img2pdf", "--output", output, "--", *rotated_files], check=True, capture_output=True, text=True)
             except subprocess.CalledProcessError as error:
                 result["message"] = error.stderr.strip() or str(error)
+                result["status"] = 1
+                return
+            except Exception as error:
+                result["message"] = str(error)
                 result["status"] = 1
                 return
             result["message"] = f"PDF creado: {output} ({len(ordered)} imágenes)"
