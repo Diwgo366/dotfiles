@@ -214,7 +214,8 @@ pdfview() {
     return 1
   fi
 
-  command python3 - "$recursive" <<'PY'
+  local script
+  script=$(command cat <<'PY'
 import curses
 import subprocess
 import sys
@@ -333,6 +334,8 @@ if result["message"]:
     print(result["message"], file=sys.stderr if result["status"] else sys.stdout)
 sys.exit(result["status"])
 PY
+  ) || return 1
+  command python3 -c "$script" "$recursive"
 }
 
 
