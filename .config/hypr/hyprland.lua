@@ -14,6 +14,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("/usr/lib/xdg-desktop-portal --replace")
 	hl.exec_cmd('ags run "$AGS_DIR/src/app.ts"')
 	hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
+	hl.exec_cmd("swaync")
 	hl.exec_cmd(paths.scripts .. "/system/clean-temp-download.sh")
 end)
 
@@ -21,3 +22,11 @@ dofile(configDir .. "/input.lua")
 dofile(configDir .. "/window-rules.lua")
 dofile(configDir .. "/keybinds.lua")
 dofile(configDir .. "/appearance.lua")
+
+-- Optional per-device settings kept outside the shared Dotfiles repository.
+local localConfig = os.getenv("HOME") .. "/.config/hypr-local/monitors.lua"
+local localConfigFile = io.open(localConfig, "r")
+if localConfigFile then
+	localConfigFile:close()
+	dofile(localConfig)
+end

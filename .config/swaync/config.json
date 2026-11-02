@@ -1,0 +1,12 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "bottom",
+  "layer": "overlay",
+  "layer-shell-cover-screen": true,
+  "timeout": 5,
+  "timeout-low": 5,
+  "timeout-critical": 5,
+  "notification-window-width": 360,
+  "transition-time": 200
+}

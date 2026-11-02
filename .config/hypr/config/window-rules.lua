@@ -201,10 +201,11 @@ hl.layer_rule({
   no_anim = true,
 })
 
--- Dunst: las notificaciones entran desde la derecha hacia la izquierda.
+-- SwayNC anima sus tarjetas; evita que Hyprland anime la capa completa.
 hl.layer_rule({
   match = {
-    namespace = "notifications",
+    namespace = "swaync-notification-window",
   },
-  animation = "slide right",
+  no_anim = true,
 })
+
