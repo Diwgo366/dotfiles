@@ -36,13 +36,13 @@ window {
 }
 
 #input:focus image {
-    color: #fde68a;
+    color: #e2e8f0;
 }
 
 #input:focus {
     border: 2px solid #fdba74;
 	background-color: #1e2941;
-    color: #fde68a;
+    color: #e2e8f0;
 	box-shadow: none;
 }
 
@@ -66,7 +66,7 @@ window {
     padding: 8px;
     border-radius: 10px;
     transition: all 0.2s ease-in-out;
-    color: #fde68a;
+    color: #e2e8f0;
     background-color: transparent;
 }
 
